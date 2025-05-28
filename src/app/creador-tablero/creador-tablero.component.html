@@ -1,0 +1,57 @@
+<div class="p-4">
+  
+  <h2>Crear Tablero</h2>
+  <label>
+    Nombre:
+    <input [(ngModel)]="nombreTablero" />
+  </label>
+
+  <div>
+    Filas:
+    <input type="number" [(ngModel)]="filas" min="1" />
+    Columnas:
+    <input type="number" [(ngModel)]="columnas" min="1" />
+    <button (click)="generarTablero()">Generar</button>
+  </div>
+
+  <div *ngIf="tableroGrid.length">
+    <h3>Tablero</h3>
+    <table border="1">
+      <tr *ngFor="let fila of tableroGrid; let i = index" class="tablero">
+        <td *ngFor="let celda of fila; let j = index" (click)="seleccionarCelda(i, j)" class="celda">
+          <div>
+            <p id="masTablero">+</p>
+            <div *ngIf="selectedCell?.fila === i && selectedCell?.columna === j">
+              <select #accionSelect>
+                <option *ngFor="let tipo of accionesDisponibles" [value]="tipo">{{ tipo }}</option>
+              </select>
+              <button (click)="agregarAccion(i, j, accionSelect.value)">Agregar Acción</button>
+              <ul>
+                <li *ngFor="let accion of celda.acciones">
+                  {{ accion.tipo }} (ID: {{ accion.id }})
+                </li>
+              </ul>
+            </div>
+          <!-- robotito con movimiento
+            <div *ngIf="robotPos.fila === i && robotPos.columna === j">
+              <strong style="color: red;">🤖</strong>
+            </div>
+            <div class="controles">
+                <button (click)="moverRobot('arriba')">⬆️</button>
+                <div>
+                  <button (click)="moverRobot('izquierda')">⬅️</button>
+                  <button (click)="moverRobot('derecha')">➡️</button>
+                </div>
+                <button (click)="moverRobot('abajo')">⬇️</button>
+            </div>
+          -->
+          </div>
+        </td>
+      </tr>
+    </table>
+
+    
+
+    <button (click)="guardarTablero()">Guardar Tablero</button>
+  </div>
+</div>
