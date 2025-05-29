@@ -98,4 +98,7 @@ export class CreadorTableroComponent {
     console.log('Tablero generado:', tablero);
     return tablero;
   }
+  cerrarPanel() {
+    this.selectedCell = null;
+  }
 }

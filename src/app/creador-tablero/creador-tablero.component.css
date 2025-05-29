@@ -1,40 +1,70 @@
-table {
-  border-collapse: collapse;
+.contenedor-tablero-panel {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
   margin-top: 1rem;
-}
-td {
-  padding: 0.5rem;
-  vertical-align: top;
-  cursor: pointer;
+  width: 75%;
 }
 
-.controles {
-  margin-top: 1rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+.tablero-wrapper {
+  flex: 1;
+  max-width: 75vw;
+  overflow-x: auto;
 }
-.controles div {
-  display: flex;
-  justify-content: center;
-  gap: 0.5rem;
+
+table {
+  border-collapse: collapse;
+  margin-bottom: 1rem;
+  width: 100%;
 }
-.controles button {
-  margin: 2px;
-  font-size: 1.2rem;
-}
-.celda{
+
+td {
   width: 100px;
   height: 100px;
+  vertical-align: top;
+  cursor: pointer;
+  border: 1px solid black;
+  text-align: center;
+}
+.celda {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 .celda:hover {
-  background-color: #0000006c;
-  #masTablero {
-    display: block;
+  background-color: #00000015;
+  #masTablero{
+    display: block !important;
   }
 }
-#masTablero {
+#masTablero{
+  display: flex;
   display: none;
-  position: center;
-  padding: 0.5rem;
+}
+.panel-lateral {
+  width: 25vw;
+  min-width: 200px;
+  max-width: 400px;
+  padding: 1rem;
+  border: 1px solid #ccc;
+  background: #f5f5f5;
+  border-radius: 0.5rem;
+  box-shadow: 2px 2px 6px #00000020;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cerrar {
+  background-color: transparent;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #666;
+}
+.cerrar:hover {
+  color: #000;
 }
