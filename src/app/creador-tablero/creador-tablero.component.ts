@@ -27,10 +27,31 @@ export class CreadorTableroComponent {
     );
     this.robotPos = { fila: 0, columna: 0 };
     this.selectedCell = null;
+    this.verificarTamanioCeldas();
   }
 
+  panelStyles = {};
   seleccionarCelda(fila: number, columna: number) {
     this.selectedCell = { fila, columna };
+
+    // Esperar al próximo ciclo para obtener coordenadas del DOM
+    setTimeout(() => {
+      const celdaElem = document.querySelectorAll('.tablero tr')[fila]?.children[columna] as HTMLElement;
+
+      if (celdaElem) {
+        const rect = celdaElem.getBoundingClientRect();
+        const espacioDerecha = window.innerWidth - rect.right;
+
+        const left = espacioDerecha > 300 ? rect.right + 10 : rect.left - 310;
+        const top = rect.top + window.scrollY;
+
+        this.panelStyles = {
+          position: 'absolute',
+          top: `${top}px`,
+          left: `${left}px`,
+        };
+      }
+    }, 0);
   }
 
   agregarAccion(fila: number, columna: number, tipo: string) {
@@ -101,4 +122,30 @@ export class CreadorTableroComponent {
   cerrarPanel() {
     this.selectedCell = null;
   }
+  zoomLevel = 1;
+  mostrarZoom = false;
+  verificarTamanioCeldas() {
+    setTimeout(() => {
+      const unaCelda = document.querySelector('.celda') as HTMLElement;
+      if (unaCelda) {
+        const { width, height } = unaCelda.getBoundingClientRect();
+        this.mostrarZoom = width < 80 || height < 80;
+      }
+    }, 0);
+  }
+  zoomIn() {
+    this.zoomLevel = Math.min(100, this.zoomLevel + 0.1);
+    this.verificarTamanioCeldas();
+  }
+  zoomOut() {
+    this.zoomLevel = Math.max(1, this.zoomLevel - 0.1);
+    this.verificarTamanioCeldas();
+  }
+  updateZoom() {
+    const wrapper = document.querySelector('.tablero-wrapper') as HTMLElement;
+    if (wrapper) {
+      wrapper.style.transform = `scale(${this.zoomLevel})`;
+    }
+  }
+
 }

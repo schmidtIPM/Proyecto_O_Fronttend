@@ -13,23 +13,34 @@
     <button (click)="generarTablero()">Generar</button>
   </div>
 
-  <div *ngIf="tableroGrid.length">
+  <div *ngIf="tableroGrid.length" class="tablero-container">
     <h3>Tablero</h3>
-    <table border="1">
-      <tr *ngFor="let fila of tableroGrid; let i = index" class="tablero">
-        <td *ngFor="let celda of fila; let j = index" (click)="seleccionarCelda(i, j)" class="celda">
-          <div>
-            <p id="masTablero">+</p>
-            <!-- Aquí se elimina el panel dentro de la celda -->
-          </div>
-        </td>
-      </tr>
-    </table>
+    <div *ngIf="mostrarZoom" style="margin-bottom: 1rem;">
+      Zoom:
+      <button (click)="zoomIn()">+</button>
+      <button (click)="zoomOut()">−</button>
+    </div>
+
+    <div class="tablero-wrapper"> <!-- viewport con scroll -->
+      <div class="tablero-zoom" [ngStyle]="{ transform: 'scale(' + zoomLevel + ')' }">
+        <table>
+          <tr *ngFor="let fila of tableroGrid; let i = index">
+            <td *ngFor="let celda of fila; let j = index" 
+                (click)="seleccionarCelda(i, j)" class="celda">
+              <div>
+                <p id="masTablero">+</p>
+              </div>
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
 
     <button (click)="guardarTablero()">Guardar Tablero</button>
   </div>
   <!-- PANEL LATERAL DE EDICIÓN DE CELDA -->
-  <div *ngIf="selectedCell" class="panel-lateral">
+  <div *ngIf="selectedCell" class="panel-lateral" [ngStyle]="panelStyles">
     <div class="panel-header">
       <h3>Celda: ({{ selectedCell.fila }}, {{ selectedCell.columna }})</h3>
       <button class="cerrar" (click)="cerrarPanel()">✕</button>

@@ -10,7 +10,7 @@ describe('CreadorTableroComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [CreadorTableroComponent],
-      imports: [FormsModule] // para ngModel
+      imports: [FormsModule]
     }).compileComponents();
 
     fixture = TestBed.createComponent(CreadorTableroComponent);
