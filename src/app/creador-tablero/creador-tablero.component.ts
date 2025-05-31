@@ -12,14 +12,18 @@ import { CommonModule } from '@angular/common';
 })
 export class CreadorTableroComponent {
   filas = 3;
+  tableroGenerado = false;
   columnas = 3;
   nombreTablero = 'Nuevo Tablero';
   tableroGrid: { acciones: Accion[] }[][] = [];
   accionesDisponibles: string[] = ['audio', 'movimiento', 'luz'];
   idAccion = 0;
-
+  zoomLevel = 1;
+  mostrarZoom = false;
   selectedCell: { fila: number; columna: number } | null = null;
   robotPos: { fila: number; columna: number } = { fila: 0, columna: 0 };
+  panelStyles = {};
+  nuevaAccion: Accion | null = null;
 
   generarTablero() {
     this.tableroGrid = Array.from({ length: this.filas }, () =>
@@ -28,16 +32,12 @@ export class CreadorTableroComponent {
     this.robotPos = { fila: 0, columna: 0 };
     this.selectedCell = null;
     this.verificarTamanioCeldas();
+    this.tableroGenerado = true;
   }
-
-  panelStyles = {};
   seleccionarCelda(fila: number, columna: number) {
     this.selectedCell = { fila, columna };
-
-    // Esperar al próximo ciclo para obtener coordenadas del DOM
     setTimeout(() => {
       const celdaElem = document.querySelectorAll('.tablero tr')[fila]?.children[columna] as HTMLElement;
-
       if (celdaElem) {
         const rect = celdaElem.getBoundingClientRect();
         const espacioDerecha = window.innerWidth - rect.right;
@@ -51,9 +51,8 @@ export class CreadorTableroComponent {
           left: `${left}px`,
         };
       }
-    }, 0);
+    });
   }
-
   agregarAccion(fila: number, columna: number, tipo: string) {
     let accion: Accion;
 
@@ -73,7 +72,59 @@ export class CreadorTableroComponent {
 
     this.tableroGrid[fila][columna].acciones.push(accion);
   }
-
+  mostrarFormularioAccion(tipo: string) {
+    switch (tipo) {
+      case 'audio':
+        this.nuevaAccion = new Audio(this.idAccion++);
+        break;
+      case 'movimiento':
+        this.nuevaAccion = new Movimiento(this.idAccion++);
+        break;
+      case 'luz':
+        this.nuevaAccion = new Luz(this.idAccion++);
+        break;
+      default:
+        this.nuevaAccion = null;
+    }
+  }
+  confirmarAccion(fila: number, columna: number) {
+    if (this.nuevaAccion) {
+      this.tableroGrid[fila][columna].acciones.push(this.nuevaAccion);
+      this.nuevaAccion = null;
+    }
+  }
+  onArchivoAudioChange(event: any) {
+    const file = event.target.files[0];
+    if (file && this.nuevaAccion instanceof Audio) {
+      this.nuevaAccion.archivo = file;
+    }
+    
+    if (this.selectedCell && this.nuevaAccion) {
+      if (this.nuevaAccion instanceof Audio) {
+        console.log("Archivo MP3 cargado:", this.nuevaAccion.archivo);
+      }
+      this.tableroGrid[this.selectedCell.fila][this.selectedCell.columna].acciones.push(this.nuevaAccion);
+    }
+    this.nuevaAccion = null;
+  }
+  getDireccionMovimiento(): string {
+    if (this.nuevaAccion instanceof Movimiento) {
+      return this.nuevaAccion.direccion || '';
+    }
+    return '';
+  }
+  setDireccionMovimiento(direccion: 'avanzar' | 'girar') {
+    if (this.nuevaAccion instanceof Movimiento) {
+      this.nuevaAccion.direccion = direccion;
+    }
+    if (this.selectedCell && this.nuevaAccion) {
+      this.tableroGrid[this.selectedCell.fila][this.selectedCell.columna].acciones.push(this.nuevaAccion);
+    }
+    this.nuevaAccion = null;
+  }
+  get luz(): Luz | null {
+    return this.nuevaAccion instanceof Luz ? this.nuevaAccion as Luz : null;
+  }
   moverRobot(direccion: 'arriba' | 'abajo' | 'izquierda' | 'derecha') {
     const { fila, columna } = this.robotPos;
     let nuevaFila = fila;
@@ -96,7 +147,6 @@ export class CreadorTableroComponent {
 
     this.robotPos = { fila: nuevaFila, columna: nuevaColumna };
   }
-
   guardarTablero(): Tablero {
     const tags: Tag[] = [];
     let tagId = 0;
@@ -122,30 +172,32 @@ export class CreadorTableroComponent {
   cerrarPanel() {
     this.selectedCell = null;
   }
-  zoomLevel = 1;
-  mostrarZoom = false;
   verificarTamanioCeldas() {
     setTimeout(() => {
       const unaCelda = document.querySelector('.celda') as HTMLElement;
       if (unaCelda) {
         const { width, height } = unaCelda.getBoundingClientRect();
-        this.mostrarZoom = width < 80 || height < 80;
+        this.mostrarZoom = this.columnas > 6 || this.filas > 5;
       }
     }, 0);
   }
-  zoomIn() {
-    this.zoomLevel = Math.min(100, this.zoomLevel + 0.1);
-    this.verificarTamanioCeldas();
-  }
-  zoomOut() {
-    this.zoomLevel = Math.max(1, this.zoomLevel - 0.1);
-    this.verificarTamanioCeldas();
-  }
+  zoomIn() {this.zoomLevel = Math.min(100, this.zoomLevel + 0.1);}
+  zoomOut() {this.zoomLevel = Math.max(-100, this.zoomLevel - 0.1);}
+  zoomReset() {this.zoomLevel = 1;}
   updateZoom() {
     const wrapper = document.querySelector('.tablero-wrapper') as HTMLElement;
     if (wrapper) {
       wrapper.style.transform = `scale(${this.zoomLevel})`;
     }
   }
-
+  getDescripcionAccion(accion: Accion): string {
+    if (accion instanceof Audio) {
+      return `Audio: ${accion.archivo ? accion.archivo.name : 'No seleccionado'}`;
+    } else if (accion instanceof Movimiento) {
+      return `Movimiento: ${accion.direccion}`;
+    } else if (accion instanceof Luz) {
+      return `Luz: Color ${accion.color}, Intervalo ${accion.intervalo} ms`;
+    }
+    return 'Acción desconocida';
+  }
 }

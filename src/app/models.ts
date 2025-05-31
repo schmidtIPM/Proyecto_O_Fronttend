@@ -1,31 +1,39 @@
-// Accion base y subtipos
 export type TipoAccion = 'audio' | 'movimiento' | 'luz';
 
 export class Accion {
-  constructor(
-    public id: number,
-    public tipo: TipoAccion,
-    public _id?: string // ID generado por MongoDB
-  ) {}
+  id!: number;
+  delay: number = 0;
+  tipo!: string;
 }
 
 export class Audio extends Accion {
-  constructor(id: number, _id?: string) {
-    super(id, 'audio', _id);
+  archivo: File | null = null;
+  constructor(id: number) {
+    super();
+    this.id = id;
+    this.tipo = 'audio';
   }
 }
 
 export class Movimiento extends Accion {
-  constructor(id: number, _id?: string) {
-    super(id, 'movimiento', _id);
+  direccion: 'avanzar' | 'girar' = 'avanzar';
+  constructor(id: number) {
+    super();
+    this.id = id;
+    this.tipo = 'movimiento';
   }
 }
 
 export class Luz extends Accion {
-  constructor(id: number, _id?: string) {
-    super(id, 'luz', _id);
+  color: string = '#ffffff';
+  intervalo: number = 0;
+  constructor(id: number) {
+    super();
+    this.id = id;
+    this.tipo = 'luz';
   }
 }
+
 
 export class Tag {
   constructor(
