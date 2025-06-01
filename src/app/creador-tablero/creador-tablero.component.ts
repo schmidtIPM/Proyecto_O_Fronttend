@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { Accion, Audio, Movimiento, Luz, Tablero, Tag } from '../models';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-
+import { ConectionBackService } from '../conection-back.service';
 @Component({
   standalone: true,
   selector: 'app-creador-tablero',
@@ -24,6 +24,8 @@ export class CreadorTableroComponent {
   robotPos: { fila: number; columna: number } = { fila: 0, columna: 0 };
   panelStyles = {};
   nuevaAccion: Accion | null = null;
+
+  constructor(private conectionBack: ConectionBackService) {}
 
   generarTablero() {
     this.tableroGrid = Array.from({ length: this.filas }, () =>
@@ -147,7 +149,7 @@ export class CreadorTableroComponent {
 
     this.robotPos = { fila: nuevaFila, columna: nuevaColumna };
   }
-  guardarTablero(): Tablero {
+  guardarTablero() {
     const tags: Tag[] = [];
     let tagId = 0;
 
@@ -166,8 +168,17 @@ export class CreadorTableroComponent {
       tags
     );
 
-    console.log('Tablero generado:', tablero);
-    return tablero;
+    console.log('Tablero a guardar:', tablero);
+
+    this.conectionBack.guardarTablero(tablero)
+      .then(respuesta => {
+        console.log('Tablero guardado correctamente en el backend:', respuesta);
+        alert('Tablero guardado con éxito');
+      })
+      .catch(error => {
+        console.error('Error al guardar el tablero:', error);
+        alert('Hubo un error al guardar el tablero.');
+      });
   }
   cerrarPanel() {
     this.selectedCell = null;
@@ -192,7 +203,7 @@ export class CreadorTableroComponent {
   }
   getDescripcionAccion(accion: Accion): string {
     if (accion instanceof Audio) {
-      return `Audio: ${accion.archivo ? accion.archivo.name : 'No seleccionado'}`;
+      return `Audio: ${accion.archivo ? (accion.archivo instanceof File ? accion.archivo.name : accion.archivo) : 'No seleccionado'}`;
     } else if (accion instanceof Movimiento) {
       return `Movimiento: ${accion.direccion}`;
     } else if (accion instanceof Luz) {

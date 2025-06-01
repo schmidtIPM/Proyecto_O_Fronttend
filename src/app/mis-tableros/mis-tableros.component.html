@@ -1,1 +1,9 @@
 <p>mis-tableros works!</p>
+<div class="tablero-container">
+  <div class="tablero" *ngFor="let tablero of tableros">
+    <h3>{{ tablero.id }}</h3>
+  </div>
+    <div class="tablero" *ngIf="!tableros.length">
+        <p>No hay tableros disponibles.</p>
+    </div>
+</div>

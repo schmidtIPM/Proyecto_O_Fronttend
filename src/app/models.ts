@@ -7,7 +7,7 @@ export class Accion {
 }
 
 export class Audio extends Accion {
-  archivo: File | null = null;
+  archivo: File | null | string = null;
   constructor(id: number) {
     super();
     this.id = id;
