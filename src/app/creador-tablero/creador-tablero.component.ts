@@ -24,7 +24,7 @@ export class CreadorTableroComponent {
   robotPos: { fila: number; columna: number } = { fila: 0, columna: 0 };
   panelStyles = {};
   nuevaAccion: Accion | null = null;
-
+  
   constructor(private conectionBack: ConectionBackService) {}
 
   generarTablero() {
@@ -152,13 +152,12 @@ export class CreadorTableroComponent {
   guardarTablero() {
     const tags: Tag[] = [];
     let tagId = 0;
-
-    for (let fila of this.tableroGrid) {
-      for (let celda of fila) {
-        tags.push(new Tag(tagId++, celda.acciones));
+    for (let filaIndex = 0; filaIndex < this.tableroGrid.length; filaIndex++) {
+      for (let columnaIndex = 0; columnaIndex < this.tableroGrid[filaIndex].length; columnaIndex++) {
+        const celda = this.tableroGrid[filaIndex][columnaIndex];
+        tags.push(new Tag(tagId++, celda.acciones, filaIndex, columnaIndex));
       }
     }
-
     const tablero = new Tablero(
       Date.now(),
       this.nombreTablero,
@@ -167,12 +166,9 @@ export class CreadorTableroComponent {
       tags[0],
       tags
     );
-
-    console.log('Tablero a guardar:', tablero);
-
     this.conectionBack.guardarTablero(tablero)
       .then(respuesta => {
-        console.log('Tablero guardado correctamente en el backend:', respuesta);
+        console.log('Tablero guardado correctamente:', respuesta);
         alert('Tablero guardado con éxito');
       })
       .catch(error => {
@@ -180,6 +176,7 @@ export class CreadorTableroComponent {
         alert('Hubo un error al guardar el tablero.');
       });
   }
+
   cerrarPanel() {
     this.selectedCell = null;
   }

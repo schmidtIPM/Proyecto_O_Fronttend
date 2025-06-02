@@ -14,8 +14,15 @@ export class AppComponent {
 
   constructor(private router: Router) {}
 
-  navegarAMisTableros() {
-    this.router.navigate(['/misTableros']);
-    console.log('Navegando a mis tableros');
+  irACreador() {
+    this.router.navigate(['/creador-de-tableros']);
+  }
+
+  irAActualizar(id: string) {
+    this.router.navigate(['/actualizador-de-tableros', id]);
+  }
+
+  irAHome() {
+    this.router.navigate(['/']);
   }
 }

@@ -25,7 +25,6 @@ export interface ILuz extends IAccion {
 export interface ITag {
   ID: number;
   listaAcciones: IAccion[];
-  posterior: ITag | null;
   _id?: string;
 }
 

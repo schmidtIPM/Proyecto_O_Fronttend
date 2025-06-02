@@ -1,0 +1,26 @@
+<div class="p-4">
+  <h2 *ngIf="tablero">Tablero: {{ tablero?.nombre }}</h2>
+
+  <p *ngIf="cargando">Cargando tablero...</p>
+
+  <div *ngIf="!cargando && tableroGrid.length">
+    <table class="tablero">
+      <tr *ngFor="let fila of tableroGrid; let i = index">
+        <td *ngFor="let celda of fila; let j = index">
+          <div class="celda">
+            <strong>({{ i }}, {{ j }})</strong>
+            <ul>
+              <li *ngFor="let accion of celda.acciones">
+                {{ getDescripcionAccion(accion) }}
+              </li>
+            </ul>
+          </div>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <div *ngIf="!cargando && !tableroGrid.length">
+    <p>No hay acciones cargadas para este tablero.</p>
+  </div>
+</div>

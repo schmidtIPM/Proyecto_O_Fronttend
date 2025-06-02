@@ -38,8 +38,9 @@ export class Luz extends Accion {
 export class Tag {
   constructor(
     public ID: number,
-    public listaAcciones: Accion[], // Lista de instancias de Accion (o subclases)
-    public posterior: Tag | null = null,
+    public listaAcciones: Accion[], 
+    public fila: number,
+    public columna: number,
     public _id?: string
   ) {}
 }
