@@ -68,6 +68,7 @@
       <div *ngIf="luz">
         <input type="color" [(ngModel)]="luz.color">
         <input type="number" [(ngModel)]="luz.intervalo">
+        <button (click)="setLuz(luz.color, luz.intervalo)">Agregar</button>
       </div>
 
     </div>

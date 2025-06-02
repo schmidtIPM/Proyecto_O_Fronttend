@@ -115,6 +115,16 @@ export class CreadorTableroComponent {
     }
     return '';
   }
+
+  setLuz(color : string, intervalo: number){
+    if (this.selectedCell && this.nuevaAccion) {
+      if (this.nuevaAccion instanceof Luz) {
+        console.log("Luz cargada:", this.nuevaAccion.color);
+      }
+      this.tableroGrid[this.selectedCell.fila][this.selectedCell.columna].acciones.push(this.nuevaAccion);
+    }
+    this.nuevaAccion = null;
+  }
   setDireccionMovimiento(direccion: 'avanzar' | 'girar') {
     if (this.nuevaAccion instanceof Movimiento) {
       this.nuevaAccion.direccion = direccion;

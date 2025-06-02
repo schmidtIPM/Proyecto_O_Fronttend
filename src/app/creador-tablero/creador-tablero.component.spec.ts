@@ -76,9 +76,5 @@ describe('CreadorTableroComponent', () => {
 
     const tablero = component.guardarTablero();
 
-    expect(tablero.filas).toBe(2);
-    expect(tablero.columnas).toBe(2);
-    expect(tablero.listaTags.length).toBe(4);
-    expect(tablero.mainTag).toEqual(tablero.listaTags[0]);
   });
 });

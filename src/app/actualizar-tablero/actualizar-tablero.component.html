@@ -1,23 +1,90 @@
 <div class="p-4">
-  <h2 *ngIf="tablero">Tablero: {{ tablero?.nombre }}</h2>
+  <div *ngIf="tablero">
+    <h2>Tablero: {{ tablero.nombre }}</h2>
+  </div>
 
   <p *ngIf="cargando">Cargando tablero...</p>
 
-  <div *ngIf="!cargando && tableroGrid.length">
-    <table class="tablero">
-      <tr *ngFor="let fila of tableroGrid; let i = index">
-        <td *ngFor="let celda of fila; let j = index">
-          <div class="celda">
-            <strong>({{ i }}, {{ j }})</strong>
-            <ul>
-              <li *ngFor="let accion of celda.acciones">
-                {{ getDescripcionAccion(accion) }}
-              </li>
-            </ul>
-          </div>
-        </td>
-      </tr>
-    </table>
+  <div *ngIf="!cargando && tableroGrid.length" class="contenedor-tablero-panel">
+    <div class="tablero-container">
+      <div style="margin-bottom: 1rem;">
+        Zoom:
+        <button (click)="zoomIn()">+</button>
+        <button (click)="zoomOut()">−</button>
+        <button *ngIf="zoomLevel !== 1" (click)="zoomReset()">Reset</button>
+      </div>
+      <div class="tablero-wrapper">
+        <div class="tablero-zoom" [ngStyle]="{ transform: 'scale(' + zoomLevel + ')' }">
+          <table>
+            <tr *ngFor="let fila of tableroGrid; let i = index">
+              <td *ngFor="let celda of fila; let j = index" (click)="seleccionarCelda(i, j)">
+                <div class="celda">
+                  <div>
+                    <p id="masTablero">({{ i }}, {{ j }})</p>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="selectedCell" class="panel-lateral">
+      <div class="panel-header">
+        <h3>Celda: ({{ selectedCell.fila }}, {{ selectedCell.columna }})</h3>
+        <button class="cerrar" (click)="cerrarPanel()">✕</button>
+      </div>
+      <div class="agregar">
+        <p><strong>Agregar acción:</strong></p>
+        <button *ngFor="let tipo of accionesDisponibles"
+                (click)="mostrarFormularioAccion(tipo)">
+          + {{ tipo }}
+        </button>
+      </div>
+      <div *ngIf="nuevaAccion" class="formulario-accion">
+        <h4>Configurar acción: {{ nuevaAccion.tipo }}</h4>
+        <div *ngIf="nuevaAccion?.tipo === 'audio'">
+          <label>Archivo MP3:
+            <input type="file" accept=".mp3" (change)="onArchivoAudioChange($event)">
+          </label>
+        </div>
+        <div *ngIf="nuevaAccion?.tipo === 'movimiento'">
+          <p>Seleccionar acción:</p>
+          <button (click)="setDireccionMovimiento('avanzar')">Avanzar</button>
+          <button (click)="setDireccionMovimiento('girar')">Girar</button>
+          <p><strong>Elegido:</strong> {{ getDireccionMovimiento() }}</p>
+        </div>
+        <div *ngIf="luz">
+          <input type="color" [(ngModel)]="luz.color">
+          <input type="number" [(ngModel)]="luz.intervalo">
+          <button (click)="setLuz(luz.color, luz.intervalo)">Agregar</button>
+        </div>
+
+      </div>
+      <div class="preview">
+        <p><strong>Acciones actuales:</strong></p>
+        <ul>
+          <li *ngFor="let accion of tableroGrid[selectedCell!.fila][selectedCell!.columna].acciones" style="margin-bottom: 1em;">
+            <div>
+              {{ getDescripcionAccion(accion) }}
+
+              <ng-container *ngIf="esAudio(accion)">
+                <button (click)="reproducirAudio(accion.archivo)">🔊</button>
+              </ng-container>
+              <button (click)="eliminarAccion(accion)" style="float: right;">X</button>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 0.5em; margin-top: 0.3em;">
+              <label style="font-size: 0.9em;">Delay:</label>
+              <input type="number" [(ngModel)]="accion.delay" style="width: 4em;" min="0">
+              <span style="font-size: 0.9em;">segundos</span>
+            </div>
+          </li>
+
+        </ul>
+      </div>
+    </div>
   </div>
 
   <div *ngIf="!cargando && !tableroGrid.length">

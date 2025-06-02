@@ -38,7 +38,6 @@ export class ConectionBackService {
       throw error;
     }
   }
-
   async eliminarTablero(id: number): Promise<any> {
     try {
       const response = await axios.delete(`${this.baseUrl}/tablero/eliminar/${id}`);
@@ -49,27 +48,10 @@ export class ConectionBackService {
       throw error;
     }
   }
-  async modificarTablero(data: Tablero): Promise<any> {
-    const formData = new FormData();
-    formData.append('data', JSON.stringify(data));
-    data.mainTag.listaAcciones.forEach((accion, i) => {
-      if (accion.tipo === 'audio' && typeof (accion as any).archivo !== 'string') {
-        formData.append(`mainTag-${i}`, (accion as any).archivo as File);
-      }
-    });
-    data.listaTags.forEach((tag, tagIndex) => {
-      tag.listaAcciones.forEach((accion, accionIndex) => {
-        if (accion.tipo === 'audio' && typeof (accion as any).archivo !== 'string') {
-          formData.append(`tag-${tagIndex}-accion-${accionIndex}`, (accion as any).archivo as File);
-        }
-      });
-    });
+  async modificarTablero(data: Tablero, id: number): Promise<any> {
     try {
-      const response = await axios.put(`${this.baseUrl}/tablero/actualizar`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      });
+      await this.eliminarTablero(id);
+      const response = await this.guardarTablero(data);
       return response.data;
     } catch (error) {
       console.error('Error al modificar el tablero:', error);
@@ -77,11 +59,10 @@ export class ConectionBackService {
     }
   }
   async getTableroPorId(id: string): Promise<Tablero | null> {
-    try {
+    try { 
       const response = await axios.get(`${this.baseUrl}/tablero/id/${id}`);
-      const tableros = response.data;
+      const tableros: Tablero[] = [response.data];
       await this.convertirAudios(tableros);
-      console.log('Tableros después de convertir audios:', tableros);
       return this.reemplazarRutasConCache(tableros)[0];
     } catch (error) {
       console.error('Error al obtener el tablero con ID', id, error);
@@ -100,8 +81,9 @@ export class ConectionBackService {
     }
   }
   private audioCache: Map<string, string> = new Map();
-  private async convertirAudios(tableros: Tablero[]) {
+  async convertirAudios(tableros: (Tablero|null)[]) {
     for (const tablero of tableros) {
+      if (tablero !== null){
       const tags = [tablero.mainTag, ...tablero.listaTags];
       for (const tag of tags) {
         for (const accion of tag.listaAcciones) {
@@ -120,8 +102,9 @@ export class ConectionBackService {
         }
       }
     }
+    }
   }
-  private reemplazarRutasConCache(tableros: Tablero[]): Tablero[] {
+  reemplazarRutasConCache(tableros: Tablero[]): Tablero[] {
     return tableros.map(tablero => {
       const procesarTag = (tag: Tag) => {
         tag.listaAcciones = tag.listaAcciones.map(accion => {
@@ -141,7 +124,7 @@ export class ConectionBackService {
       return tablero;
     });
   }
-  private async convertirBlobABase64(blob: Blob): Promise<string> {
+  async convertirBlobABase64(blob: Blob): Promise<string> {
     if (!isPlatformBrowser(this.platformId)) {
       throw new Error('FileReader solo está disponible en el navegador');
     }
