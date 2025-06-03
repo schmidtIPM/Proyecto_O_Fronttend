@@ -6,13 +6,13 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 @Component({
-  selector: 'app-actualizar-tablero',
-  templateUrl: './actualizar-tablero.component.html',
-  styleUrls: ['./actualizar-tablero.component.css'],
+  selector: 'app-simulador-tablero',
   standalone: true,
-  imports: [FormsModule, CommonModule]
+  imports: [FormsModule, CommonModule],
+  templateUrl: './simulador-tablero.component.html',
+  styleUrl: './simulador-tablero.component.css'
 })
-export class ActualizarTableroComponent implements OnInit {
+export class SimuladorTableroComponent {
   tablero!: Tablero;
   tableroGrid: { acciones: Accion[] }[][] = [];
   cargando = true;
@@ -22,11 +22,35 @@ export class ActualizarTableroComponent implements OnInit {
   panelStyles: any = {};
   nuevaAccion: Accion | null = null;
   idAccion = 0;
+  robotPos: { fila: number; columna: number } = { fila: 0, columna: 0 };
+
   constructor(
     private route: ActivatedRoute,
     private conectionBack: ConectionBackService,
     private router: Router
   ) {}
+  moverRobot(direccion: 'arriba' | 'abajo' | 'izquierda' | 'derecha') {
+    const { fila, columna } = this.robotPos;
+    let nuevaFila = fila;
+    let nuevaColumna = columna;
+
+    switch (direccion) {
+      case 'arriba':
+        nuevaFila = Math.max(0, fila - 1);
+        break;
+      case 'abajo':
+        nuevaFila = Math.min(this.tablero.filas - 1, fila + 1);
+        break;
+      case 'izquierda':
+        nuevaColumna = Math.max(0, columna - 1);
+        break;
+      case 'derecha':
+        nuevaColumna = Math.min(this.tablero.filas - 1, columna + 1);
+        break;
+    }
+
+    this.robotPos = { fila: nuevaFila, columna: nuevaColumna };
+  }
   ngOnInit(): void {
     const id: string | null = this.route.snapshot.paramMap.get('id');
     if (!id) return;
@@ -48,61 +72,8 @@ export class ActualizarTableroComponent implements OnInit {
       this.cargando = false;
     });
   }
-  onArchivoAudioChange(event: any) {
-    const file = event.target.files[0];
-    if (file && this.nuevaAccion instanceof Audio) {
-      this.nuevaAccion.archivo = file;
-    }
-    
-    if (this.selectedCell && this.nuevaAccion) {
-      if (this.nuevaAccion instanceof Audio) {
-        console.log("Archivo MP3 cargado:", this.nuevaAccion.archivo);
-      }
-      this.tableroGrid[this.selectedCell.fila][this.selectedCell.columna].acciones.push(this.nuevaAccion);
-    }
-    this.nuevaAccion = null;
-  }
-  setLuz(color : string, intervalo: number){
-    if (this.selectedCell && this.nuevaAccion) {
-      if (this.nuevaAccion instanceof Luz) {
-        console.log("Luz cargada:", this.nuevaAccion.color);
-      }
-      this.tableroGrid[this.selectedCell.fila][this.selectedCell.columna].acciones.push(this.nuevaAccion);
-    }
-    this.nuevaAccion = null;
-  }
-  getDireccionMovimiento(): string {
-    if (this.nuevaAccion instanceof Movimiento) {
-      return this.nuevaAccion.direccion || '';
-    }
-    return '';
-  }
-  setDireccionMovimiento(direccion: 'avanzar' | 'girar') {
-    if (this.nuevaAccion instanceof Movimiento) {
-      this.nuevaAccion.direccion = direccion;
-    }
-    if (this.selectedCell && this.nuevaAccion) {
-      this.tableroGrid[this.selectedCell.fila][this.selectedCell.columna].acciones.push(this.nuevaAccion);
-    }
-    this.nuevaAccion = null;
-  }
   get luz(): Luz | null {
     return this.nuevaAccion instanceof Luz ? this.nuevaAccion as Luz : null;
-  }
-  mostrarFormularioAccion(tipo: string) {
-    switch (tipo) {
-      case 'audio':
-        this.nuevaAccion = new Audio(this.idAccion++);
-        break;
-      case 'movimiento':
-        this.nuevaAccion = new Movimiento(this.idAccion++);
-        break;
-      case 'luz':
-        this.nuevaAccion = new Luz(this.idAccion++);
-        break;
-      default:
-        this.nuevaAccion = null;
-    }
   }
   procesarTablero(tablero: Tablero) {
     const grid: { acciones: Accion[] }[][] = Array.from({ length: tablero.filas }, () =>
@@ -186,15 +157,6 @@ export class ActualizarTableroComponent implements OnInit {
   zoomReset() {
     this.zoomLevel = 1;
   }
-  eliminarAccion(accionAEliminar: Accion) {
-    if (!this.selectedCell) return;
-
-    const acciones = this.tableroGrid[this.selectedCell.fila][this.selectedCell.columna].acciones;
-    const index = acciones.findIndex(acc => acc.id === accionAEliminar.id);
-    if (index !== -1) {
-      acciones.splice(index, 1);
-    }
-  }
   getDescripcionAccion(accion: Accion): string {
     if (accion instanceof Audio) {
       return `Audio: `;
@@ -205,56 +167,4 @@ export class ActualizarTableroComponent implements OnInit {
     }
     return 'Acción desconocida';
   }
-  guardarTablero() {
-    this.prepararArchivosDesdeBase64(this.tablero);
-    const tags: Tag[] = [];
-    let tagId = 0;
-    for (let filaIndex = 0; filaIndex < this.tableroGrid.length; filaIndex++) {
-      for (let columnaIndex = 0; columnaIndex < this.tableroGrid[filaIndex].length; columnaIndex++) {
-        const celda = this.tableroGrid[filaIndex][columnaIndex];
-        tags.push(new Tag(tagId++, celda.acciones, filaIndex, columnaIndex));
-      }
-    } 
-    const tablero = new Tablero(
-      Date.now(),
-      this.tablero.nombre,
-      this.tablero.filas,
-      this.tablero.columnas,
-      tags[0],
-      tags,
-    );
-    this.conectionBack.modificarTablero(tablero, this.tablero.id)
-      .then(respuesta => {
-        console.log('Tablero guardado correctamente:', respuesta);
-        alert('Tablero guardado con éxito');
-      })
-      .catch(error => {
-        console.error('Error al guardar el tablero:', error);
-        alert('Hubo un error al guardar el tablero.');
-      });
-  }
-  base64ToFile(base64: string, filename: string, mime: string = 'audio/mpeg'): File {
-    const byteString = atob(base64.split(',')[1]);
-    const ab = new ArrayBuffer(byteString.length);
-    const ia = new Uint8Array(ab);
-    for (let i = 0; i < byteString.length; i++) {
-      ia[i] = byteString.charCodeAt(i);
-    }
-    const blob = new Blob([ab], { type: mime });
-    return new File([blob], filename, { type: mime });
-  }
-  prepararArchivosDesdeBase64(tablero: Tablero): void {
-    const tags = [tablero.mainTag, ...tablero.listaTags];
-    for (const tag of tags) {
-      tag.listaAcciones = tag.listaAcciones.map(accion => {
-        if (accion.tipo === 'audio' && typeof (accion as any).archivo === 'string' && (accion as any).archivo.startsWith('data:')) {
-          console.log("Archivo MP3 encontrado:", (accion as any).archivo);
-          const nombre = `audio.mp3`;
-          (accion as any).archivo = this.base64ToFile((accion as any).archivo, nombre);
-        }
-        return accion;
-      });
-    }
-  }
-
 }

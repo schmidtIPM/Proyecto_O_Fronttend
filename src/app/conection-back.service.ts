@@ -126,7 +126,7 @@ export class ConectionBackService {
   }
   async convertirBlobABase64(blob: Blob): Promise<string> {
     if (!isPlatformBrowser(this.platformId)) {
-      throw new Error('FileReader solo está disponible en el navegador');
+      return '';
     }
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
