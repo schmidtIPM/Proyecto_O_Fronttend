@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Route, Router } from '@angular/router';
 import { ConectionBackService } from '../conection-back.service';
 import { Tablero, Tag, Accion, Audio, Movimiento, Luz } from '../models';
 import { CommonModule } from '@angular/common';
@@ -13,7 +13,7 @@ import { FormsModule } from '@angular/forms';
   imports: [FormsModule, CommonModule]
 })
 export class ActualizarTableroComponent implements OnInit {
-  tablero: Tablero | null = null;
+  tablero!: Tablero;
   tableroGrid: { acciones: Accion[] }[][] = [];
   cargando = true;
   accionesDisponibles: string[] = ['audio', 'movimiento', 'luz'];
@@ -24,14 +24,20 @@ export class ActualizarTableroComponent implements OnInit {
   idAccion = 0;
   constructor(
     private route: ActivatedRoute,
-    private conectionBack: ConectionBackService
+    private conectionBack: ConectionBackService,
+    private router: Router
   ) {}
-
   ngOnInit(): void {
     const id: string | null = this.route.snapshot.paramMap.get('id');
     if (!id) return;
 
     this.conectionBack.getTableroPorId(id).then(tablero => {
+      if (!tablero) {
+        alert('Tablero no encontrado');
+        this.router.navigate(['/']);
+        this.cargando = false;
+        return;
+      }
       this.tablero = tablero;
       if (tablero) {
         this.procesarTablero(tablero);
@@ -42,7 +48,6 @@ export class ActualizarTableroComponent implements OnInit {
       this.cargando = false;
     });
   }
-
   onArchivoAudioChange(event: any) {
     const file = event.target.files[0];
     if (file && this.nuevaAccion instanceof Audio) {
@@ -57,7 +62,6 @@ export class ActualizarTableroComponent implements OnInit {
     }
     this.nuevaAccion = null;
   }
-
   setLuz(color : string, intervalo: number){
     if (this.selectedCell && this.nuevaAccion) {
       if (this.nuevaAccion instanceof Luz) {
@@ -130,7 +134,6 @@ export class ActualizarTableroComponent implements OnInit {
 
     this.tableroGrid = grid;
   }
-
   seleccionarCelda(fila: number, columna: number) {
     this.selectedCell = { fila, columna };
     setTimeout(() => {
@@ -150,11 +153,9 @@ export class ActualizarTableroComponent implements OnInit {
       }
     });
   }
-
   cerrarPanel() {
     this.selectedCell = null;
   }
-
   async reproducirAudio(base64: string | null | File) {
     if (base64 === null) {
       console.log("No hay audio.");
@@ -173,19 +174,15 @@ export class ActualizarTableroComponent implements OnInit {
       audio.play();
     }
   }
-
   esAudio(accion: Accion): accion is Audio {
     return accion instanceof Audio && typeof accion.archivo === 'string';
   }
-
   zoomIn() {
     this.zoomLevel = Math.min(100, this.zoomLevel + 0.1);
   }
-
   zoomOut() {
     this.zoomLevel = Math.max(-100, this.zoomLevel - 0.1);
   }
-
   zoomReset() {
     this.zoomLevel = 1;
   }
@@ -198,7 +195,6 @@ export class ActualizarTableroComponent implements OnInit {
       acciones.splice(index, 1);
     }
   }
-
   getDescripcionAccion(accion: Accion): string {
     if (accion instanceof Audio) {
       return `Audio: `;
@@ -209,4 +205,56 @@ export class ActualizarTableroComponent implements OnInit {
     }
     return 'Acción desconocida';
   }
+  guardarTablero() {
+    this.prepararArchivosDesdeBase64(this.tablero);
+    const tags: Tag[] = [];
+    let tagId = 0;
+    for (let filaIndex = 0; filaIndex < this.tableroGrid.length; filaIndex++) {
+      for (let columnaIndex = 0; columnaIndex < this.tableroGrid[filaIndex].length; columnaIndex++) {
+        const celda = this.tableroGrid[filaIndex][columnaIndex];
+        tags.push(new Tag(tagId++, celda.acciones, filaIndex, columnaIndex));
+      }
+    }
+    const tablero = new Tablero(
+      Date.now(),
+      this.tablero.nombre,
+      this.tablero.filas,
+      this.tablero.columnas,
+      this.tablero.mainTag,
+      this.tablero.listaTags,
+    );
+    this.conectionBack.modificarTablero(tablero, this.tablero.id)
+      .then(respuesta => {
+        console.log('Tablero guardado correctamente:', respuesta);
+        alert('Tablero guardado con éxito');
+      })
+      .catch(error => {
+        console.error('Error al guardar el tablero:', error);
+        alert('Hubo un error al guardar el tablero.');
+      });
+  }
+  base64ToFile(base64: string, filename: string, mime: string = 'audio/mpeg'): File {
+    const byteString = atob(base64.split(',')[1]);
+    const ab = new ArrayBuffer(byteString.length);
+    const ia = new Uint8Array(ab);
+    for (let i = 0; i < byteString.length; i++) {
+      ia[i] = byteString.charCodeAt(i);
+    }
+    const blob = new Blob([ab], { type: mime });
+    return new File([blob], filename, { type: mime });
+  }
+  prepararArchivosDesdeBase64(tablero: Tablero): void {
+    const tags = [tablero.mainTag, ...tablero.listaTags];
+    for (const tag of tags) {
+      tag.listaAcciones = tag.listaAcciones.map(accion => {
+        if (accion.tipo === 'audio' && typeof (accion as any).archivo === 'string' && (accion as any).archivo.startsWith('data:')) {
+          console.log("Archivo MP3 encontrado:", (accion as any).archivo);
+          const nombre = `audio.mp3`;
+          (accion as any).archivo = this.base64ToFile((accion as any).archivo, nombre);
+        }
+        return accion;
+      });
+    }
+  }
+
 }
