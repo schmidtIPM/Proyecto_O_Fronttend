@@ -105,3 +105,25 @@ td {
 .cerrar:hover {
   color: #000;
 }
+.controles{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 1em;
+}
+.rotar-90 {
+  transform: rotate(90deg);
+  transition: transform 0.3s ease;
+}
+.rotar-180 {
+  transform: rotate(180deg);
+  transition: transform 0.3s ease;
+}
+.rotar-90neg {
+  transform: rotate(-90deg);
+  transition: transform 0.3s ease;
+}
+.contenedor-robot {
+  transition: transform 0.3s ease;
+  display: inline-block;
+}

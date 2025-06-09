@@ -9,7 +9,7 @@ import { CommonModule } from '@angular/common';
   styleUrl: './mis-tableros.component.css'
 })
 export class MisTablerosComponent {
-  constructor(private conectionBack: ConectionBackService) { }
+  constructor(private conectionBack: ConectionBackService) {}
   tableros: any[] = [];
   ngOnInit() {
     this.cargarTableros();

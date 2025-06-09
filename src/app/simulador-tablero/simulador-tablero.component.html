@@ -10,7 +10,7 @@
         <button (click)="moverRobot('arriba')">⬆️</button>
         <div>
             <button (click)="moverRobot('izquierda')">⬅️</button>
-            <button (click)="">play</button>
+            <button (click)="play()">▶️</button>
             <button (click)="moverRobot('derecha')">➡️</button>
         </div>
         <button (click)="moverRobot('abajo')">⬇️</button>
@@ -31,9 +31,12 @@
                     <div>
                         <p id="masTablero">({{ i }}, {{ j }})</p>
                     </div>
-                    <div *ngIf="robotPos.fila === i && robotPos.columna === j">
-                        <strong style="color: red;">🤖</strong>
-                    </div>      
+                    <div *ngIf="robotPos.fila === i && robotPos.columna === j" class="contenedor-robot" 
+                      [ngClass]="{'rotar-90': robotPos.direccion === 'derecha',
+                        'rotar-90neg': robotPos.direccion === 'izquierda',
+                        'rotar-180': robotPos.direccion === 'abajo'}">
+                      <strong style="color: red;">🤖</strong>
+                    </div>    
                 </div>
               </td>
             </tr>

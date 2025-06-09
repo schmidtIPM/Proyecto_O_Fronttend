@@ -3,7 +3,20 @@ import { ActivatedRoute, Route, Router } from '@angular/router';
 import { ConectionBackService } from '../conection-back.service';
 import { Tablero, Tag, Accion, Audio, Movimiento, Luz } from '../models';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, isFormArray } from '@angular/forms';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+
+
+interface AccionAudio extends Accion {
+  tipo: 'audio';
+  archivo: string | File | null;
+}
+
+interface AccionMovimiento extends Accion {
+  tipo: 'movimiento';
+  valor: 'arriba' | 'abajo' | 'izquierda' | 'derecha';
+}
+
 
 @Component({
   selector: 'app-simulador-tablero',
@@ -22,34 +35,122 @@ export class SimuladorTableroComponent {
   panelStyles: any = {};
   nuevaAccion: Accion | null = null;
   idAccion = 0;
-  robotPos: { fila: number; columna: number } = { fila: 0, columna: 0 };
+  robotPos: { fila: number; columna: number; direccion: string } = { fila: 0, columna: 0, direccion: "arriba" };
+  anteriorPobotPos: { fila: number; columna: number } = { fila: 0, columna: 0 };
+  movimientosAcomulados: string[] = [];
 
   constructor(
     private route: ActivatedRoute,
     private conectionBack: ConectionBackService,
     private router: Router
   ) {}
-  moverRobot(direccion: 'arriba' | 'abajo' | 'izquierda' | 'derecha') {
-    const { fila, columna } = this.robotPos;
-    let nuevaFila = fila;
-    let nuevaColumna = columna;
-
-    switch (direccion) {
-      case 'arriba':
-        nuevaFila = Math.max(0, fila - 1);
-        break;
-      case 'abajo':
-        nuevaFila = Math.min(this.tablero.filas - 1, fila + 1);
-        break;
-      case 'izquierda':
-        nuevaColumna = Math.max(0, columna - 1);
-        break;
-      case 'derecha':
-        nuevaColumna = Math.min(this.tablero.filas - 1, columna + 1);
-        break;
+  async play() {
+    this.anteriorPobotPos = { ...this.robotPos };
+    for (const mov of this.movimientosAcomulados) {
+      let { fila, columna, direccion } = this.robotPos;
+      let nuevaFila = fila;
+      let nuevaColumna = columna;
+      let nuevaDireccion = direccion;
+      console.log(this.robotPos);
+      switch (mov) {
+        case 'arriba':
+          ({ fila: nuevaFila, columna: nuevaColumna } = this.moverEnDireccion('arriba'));
+          break;
+        case 'abajo':
+          ({ fila: nuevaFila, columna: nuevaColumna } = this.moverEnDireccion('abajo'));
+          break;
+        case 'izquierda':
+          nuevaDireccion = this.girarDireccionDelRobot(mov);
+          break;
+        case 'derecha':
+          nuevaDireccion = this.girarDireccionDelRobot(mov);
+          break;
+      }
+      this.robotPos = { fila: nuevaFila, columna: nuevaColumna, direccion: nuevaDireccion };
+      await this.esperar(500);
     }
+    this.movimientosAcomulados = [];
+    this.ejecutarListaDeAcciones();
+    console.log(this.robotPos);
+  }
+  moverEnDireccion(sentido: 'arriba' | 'abajo') {
+    const { fila, columna, direccion } = this.robotPos;
+    let nuevaFila: number = fila;
+    let nuevaColumna: number = columna;
+    const retroceder = (d: string) => {
+      switch(d) {
+        case 'arriba': if(nuevaFila < this.tablero.filas-1){ nuevaFila++;} break;
+        case 'abajo': if(nuevaFila != 0){ nuevaFila--;} break;
+        case 'derecha': if(nuevaColumna != 0){nuevaColumna--;} break;
+        default: if(nuevaColumna < this.tablero.columnas-1){nuevaColumna++;}
+      }
+    };
+    const avanzar = (d: string) => {
+      switch(d) {
+        case 'arriba': if(nuevaFila != 0){ nuevaFila--;} break;
+        case 'abajo': if(nuevaFila < this.tablero.filas-1){ nuevaFila++;} break;
+        case 'derecha': if(nuevaColumna < this.tablero.columnas-1){nuevaColumna++;} break;
+        default: if(nuevaColumna != 0){nuevaColumna--;}
+      }
+    };
+    if(sentido == 'arriba'){avanzar(direccion);}
+    else{retroceder(direccion);}
+    return {
+      fila: nuevaFila,
+      columna: nuevaColumna
+    };
+  }
+  girarDireccionDelRobot(direccion: 'izquierda' | 'derecha'){
+    switch(this.robotPos.direccion){
+      case 'izquierda':
+        if(direccion == 'izquierda'){return 'abajo'}
+        else{return 'arriba'}
+      case 'derecha':
+        if(direccion == 'derecha'){return 'abajo'}
+        else{return 'arriba'}
+      case 'abajo':
+        if(direccion == 'derecha'){return 'izquierda'}
+        else{return 'derecha'}
+      default:
+        return direccion;
+    }
+  }
+  async ejecutarListaDeAcciones(){
+    for (const tags of this.tablero.listaTags){
+      if(tags.columna == this.robotPos.columna && tags.fila == this.robotPos.fila){
+        for(const accion of tags.listaAcciones){
+          console.log(accion);
+          this.ejecutarAccion(accion);
+        }
+      }
+    }
+  }
+  async ejecutarAccion(accion: Accion) {
+    switch (accion.tipo) {
+      case 'audio': {
+        const accionAudio = accion as AccionAudio;
+        this.reproducirAudio(accionAudio.archivo);
+        break;
+      }
+      case 'movimiento': {
+        const accionMovimiento = accion as AccionMovimiento;
+        const direccion = accionMovimiento.valor;
+        this.moverRobot(direccion);
+        await this.play();
+        break;
+      }
+      case 'luz': {
+        // Manejo de acción de luz aquí
+        break;
+      }
+    }
+  }
 
-    this.robotPos = { fila: nuevaFila, columna: nuevaColumna };
+  esperar(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+  moverRobot(direccion: 'arriba' | 'abajo' | 'izquierda' | 'derecha') {
+    this.movimientosAcomulados.push(direccion);
   }
   ngOnInit(): void {
     const id: string | null = this.route.snapshot.paramMap.get('id');
