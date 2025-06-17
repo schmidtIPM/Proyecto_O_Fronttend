@@ -13,7 +13,7 @@ export interface IAudio extends IAccion {
 
 export interface IMovimiento extends IAccion {
   tipo: 'movimiento';
-  direccion: 'avanzar' | 'girar';
+  direccion: 'arriba' | 'abajo' | 'izquierda' | 'derecha';
 }
 
 export interface ILuz extends IAccion {
@@ -26,6 +26,7 @@ export interface ITag {
   ID: number;
   listaAcciones: IAccion[];
   _id?: string;
+  fondo?: string | File;
 }
 
 export interface ITablero {
@@ -36,4 +37,6 @@ export interface ITablero {
   mainTag: ITag;
   listaTags: ITag[];
   _id?: string;
+  fondo?: string;
+  colorlineas: string | File;
 }

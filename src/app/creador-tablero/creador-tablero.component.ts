@@ -16,6 +16,7 @@ export class CreadorTableroComponent {
   columnas = 3;
   nombreTablero = 'Nuevo Tablero';
   tableroGrid: { acciones: Accion[] }[][] = [];
+  tagGrid: { fondo: string | File, fila: number; columna: number }[] = []
   accionesDisponibles: string[] = ['audio', 'movimiento', 'luz'];
   idAccion = 0;
   zoomLevel = 1;
@@ -24,6 +25,8 @@ export class CreadorTableroComponent {
   robotPos: { fila: number; columna: number } = { fila: 0, columna: 0 };
   panelStyles = {};
   nuevaAccion: Accion | null = null;
+  colorLineasTablero: string = "FFFFFF";
+  fondoTablero: string | File = "FFFFFF"
   
   constructor(private conectionBack: ConectionBackService) {}
 
@@ -43,10 +46,8 @@ export class CreadorTableroComponent {
       if (celdaElem) {
         const rect = celdaElem.getBoundingClientRect();
         const espacioDerecha = window.innerWidth - rect.right;
-
         const left = espacioDerecha > 300 ? rect.right + 10 : rect.left - 310;
         const top = rect.top + window.scrollY;
-
         this.panelStyles = {
           position: 'absolute',
           top: `${top}px`,
@@ -57,7 +58,6 @@ export class CreadorTableroComponent {
   }
   agregarAccion(fila: number, columna: number, tipo: string) {
     let accion: Accion;
-
     switch (tipo) {
       case 'audio':
         accion = new Audio(this.idAccion++);
@@ -95,12 +95,44 @@ export class CreadorTableroComponent {
       this.nuevaAccion = null;
     }
   }
+  onArchivoImagenChange(event: any) {
+    const file = event.target.files[0];
+    for (var tag of this.tagGrid) {
+      if(this.selectedCell?.fila == tag.fila && this.selectedCell.columna == tag.columna){
+        if (file) {
+          tag.fondo = file;
+        }
+        return;
+      }
+    }
+    if (this.selectedCell && file) {
+      this.tagGrid.push({
+        fondo: file,
+        fila: this.selectedCell.fila,
+        columna: this.selectedCell.columna
+      });
+    }
+    event.target.value=null;
+  }
+  getEstiloFondo(fila: number, columna: number): { [key: string]: string } {
+    const tag = this.tagGrid.find(t => t.fila === fila && t.columna === columna);
+    if (!tag || !tag.fondo) return {};
+
+    const url = typeof tag.fondo === 'string'
+      ? tag.fondo
+      : URL.createObjectURL(tag.fondo);
+
+    return {
+      'background-image': `url(${url})`,
+      'background-size': 'cover',
+      'background-position': 'center'
+    };
+  }
   onArchivoAudioChange(event: any) {
     const file = event.target.files[0];
     if (file && this.nuevaAccion instanceof Audio) {
       this.nuevaAccion.archivo = file;
     }
-    
     if (this.selectedCell && this.nuevaAccion) {
       if (this.nuevaAccion instanceof Audio) {
         console.log("Archivo MP3 cargado:", this.nuevaAccion.archivo);
@@ -115,7 +147,6 @@ export class CreadorTableroComponent {
     }
     return '';
   }
-
   setLuz(color : string, intervalo: number){
     if (this.selectedCell && this.nuevaAccion) {
       if (this.nuevaAccion instanceof Luz) {
@@ -125,7 +156,7 @@ export class CreadorTableroComponent {
     }
     this.nuevaAccion = null;
   }
-  setDireccionMovimiento(direccion: 'avanzar' | 'girar') {
+  setDireccionMovimiento(direccion: 'arriba' | 'abajo' | 'izquierda' | 'derecha') {
     if (this.nuevaAccion instanceof Movimiento) {
       this.nuevaAccion.direccion = direccion;
     }
@@ -137,35 +168,14 @@ export class CreadorTableroComponent {
   get luz(): Luz | null {
     return this.nuevaAccion instanceof Luz ? this.nuevaAccion as Luz : null;
   }
-  moverRobot(direccion: 'arriba' | 'abajo' | 'izquierda' | 'derecha') {
-    const { fila, columna } = this.robotPos;
-    let nuevaFila = fila;
-    let nuevaColumna = columna;
-
-    switch (direccion) {
-      case 'arriba':
-        nuevaFila = Math.max(0, fila - 1);
-        break;
-      case 'abajo':
-        nuevaFila = Math.min(this.filas - 1, fila + 1);
-        break;
-      case 'izquierda':
-        nuevaColumna = Math.max(0, columna - 1);
-        break;
-      case 'derecha':
-        nuevaColumna = Math.min(this.columnas - 1, columna + 1);
-        break;
-    }
-
-    this.robotPos = { fila: nuevaFila, columna: nuevaColumna };
-  }
   guardarTablero() {
     const tags: Tag[] = [];
     let tagId = 0;
     for (let filaIndex = 0; filaIndex < this.tableroGrid.length; filaIndex++) {
       for (let columnaIndex = 0; columnaIndex < this.tableroGrid[filaIndex].length; columnaIndex++) {
         const celda = this.tableroGrid[filaIndex][columnaIndex];
-        tags.push(new Tag(tagId++, celda.acciones, filaIndex, columnaIndex));
+        const tagFondo = this.tagGrid.find(t => t.fila === filaIndex && t.columna === columnaIndex);
+        tags.push(new Tag(tagId++, celda.acciones, filaIndex, columnaIndex, tagFondo?.fondo));
       }
     }
     const tablero = new Tablero(
@@ -174,7 +184,9 @@ export class CreadorTableroComponent {
       this.filas,
       this.columnas,
       tags[0],
-      tags
+      tags,
+      this.colorLineasTablero,
+      this.fondoTablero
     );
     this.conectionBack.guardarTablero(tablero)
       .then(respuesta => {
@@ -186,7 +198,6 @@ export class CreadorTableroComponent {
         alert('Hubo un error al guardar el tablero.');
       });
   }
-
   cerrarPanel() {
     this.selectedCell = null;
   }

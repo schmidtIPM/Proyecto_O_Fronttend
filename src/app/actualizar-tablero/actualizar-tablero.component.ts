@@ -77,7 +77,7 @@ export class ActualizarTableroComponent implements OnInit {
     }
     return '';
   }
-  setDireccionMovimiento(direccion: 'avanzar' | 'girar') {
+  setDireccionMovimiento(direccion: 'arriba' | 'abajo' | 'izquierda' | 'derecha') {
     if (this.nuevaAccion instanceof Movimiento) {
       this.nuevaAccion.direccion = direccion;
     }
@@ -160,16 +160,7 @@ export class ActualizarTableroComponent implements OnInit {
     if (base64 === null) {
       console.log("No hay audio.");
       return;
-    }
-    if (base64 instanceof File) {
-      try {
-        const base64String = await this.conectionBack.convertirBlobABase64(base64);
-        const audio = new window.Audio(base64String);
-        audio.play();
-      } catch (error) {
-        console.error('Error al convertir el archivo a base64:', error);
-      }
-    } else {
+    } else if (typeof base64 === 'string') {
       const audio = new window.Audio(base64);
       audio.play();
     }

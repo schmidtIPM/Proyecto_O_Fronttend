@@ -28,7 +28,7 @@
           <tr *ngFor="let fila of tableroGrid; let i = index">
             <td *ngFor="let celda of fila; let j = index"
                 (click)="seleccionarCelda(i, j)">
-              <div class="celda">
+              <div class="celda" [ngStyle]="getEstiloFondo(i, j)">
                 <div>
                   <p id="masTablero">+</p>
                 </div>
@@ -45,6 +45,9 @@
       <h3>Celda: ({{ selectedCell.fila }}, {{ selectedCell.columna }})</h3>
       <button class="cerrar" (click)="cerrarPanel()">✕</button>
     </div>
+    <label>Agregar fondo:
+      <input type="file" accept=".png" (change)="onArchivoImagenChange($event)">
+    </label>
     <div class="agregar">
       <p><strong>Agregar acción:</strong></p>
       <button *ngFor="let tipo of accionesDisponibles"
@@ -61,8 +64,10 @@
       </div>
       <div *ngIf="nuevaAccion?.tipo === 'movimiento'">
         <p>Seleccionar acción:</p>
-        <button (click)="setDireccionMovimiento('avanzar')">Avanzar</button>
-        <button (click)="setDireccionMovimiento('girar')">Girar</button>
+        <button (click)="setDireccionMovimiento('arriba')">Avanzar</button>
+        <button (click)="setDireccionMovimiento('abajo')">Retroceder</button>
+        <button (click)="setDireccionMovimiento('derecha')">Girar D.</button>
+        <button (click)="setDireccionMovimiento('izquierda')">Girar I.</button>
         <p><strong>Elegido:</strong> {{ getDireccionMovimiento() }}</p>
       </div>
       <div *ngIf="luz">

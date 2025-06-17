@@ -3,20 +3,7 @@ import { ActivatedRoute, Route, Router } from '@angular/router';
 import { ConectionBackService } from '../conection-back.service';
 import { Tablero, Tag, Accion, Audio, Movimiento, Luz } from '../models';
 import { CommonModule } from '@angular/common';
-import { FormsModule, isFormArray } from '@angular/forms';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-
-
-interface AccionAudio extends Accion {
-  tipo: 'audio';
-  archivo: string | File | null;
-}
-
-interface AccionMovimiento extends Accion {
-  tipo: 'movimiento';
-  valor: 'arriba' | 'abajo' | 'izquierda' | 'derecha';
-}
-
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-simulador-tablero',
@@ -39,11 +26,8 @@ export class SimuladorTableroComponent {
   anteriorPobotPos: { fila: number; columna: number } = { fila: 0, columna: 0 };
   movimientosAcomulados: string[] = [];
 
-  constructor(
-    private route: ActivatedRoute,
-    private conectionBack: ConectionBackService,
-    private router: Router
-  ) {}
+  constructor(private route: ActivatedRoute,private conectionBack: ConectionBackService,
+    private router: Router){}
   async play() {
     this.anteriorPobotPos = { ...this.robotPos };
     for (const mov of this.movimientosAcomulados) {
@@ -51,7 +35,6 @@ export class SimuladorTableroComponent {
       let nuevaFila = fila;
       let nuevaColumna = columna;
       let nuevaDireccion = direccion;
-      console.log(this.robotPos);
       switch (mov) {
         case 'arriba':
           ({ fila: nuevaFila, columna: nuevaColumna } = this.moverEnDireccion('arriba'));
@@ -71,7 +54,6 @@ export class SimuladorTableroComponent {
     }
     this.movimientosAcomulados = [];
     this.ejecutarListaDeAcciones();
-    console.log(this.robotPos);
   }
   moverEnDireccion(sentido: 'arriba' | 'abajo') {
     const { fila, columna, direccion } = this.robotPos;
@@ -119,8 +101,9 @@ export class SimuladorTableroComponent {
     for (const tags of this.tablero.listaTags){
       if(tags.columna == this.robotPos.columna && tags.fila == this.robotPos.fila){
         for(const accion of tags.listaAcciones){
-          console.log(accion);
           this.ejecutarAccion(accion);
+          if(accion.tipo == 'movimiento' && ((accion as Movimiento).direccion == 'arriba' || 
+            (accion as Movimiento).direccion == 'abajo')){return;}
         }
       }
     }
@@ -128,24 +111,25 @@ export class SimuladorTableroComponent {
   async ejecutarAccion(accion: Accion) {
     switch (accion.tipo) {
       case 'audio': {
-        const accionAudio = accion as AccionAudio;
-        this.reproducirAudio(accionAudio.archivo);
+        this.reproducirAudio((accion as Audio).archivo);
         break;
-      }
+      } 
       case 'movimiento': {
-        const accionMovimiento = accion as AccionMovimiento;
-        const direccion = accionMovimiento.valor;
-        this.moverRobot(direccion);
-        await this.play();
+        const accionMov = accion as Movimiento;
+        if(accionMov.direccion == 'abajo' || accionMov.direccion == 'arriba'){
+          this.moverRobot(accionMov.direccion);
+          await this.play();
+        }else{
+          this.robotPos.direccion = this.girarDireccionDelRobot(accionMov.direccion);
+        }
         break;
       }
       case 'luz': {
-        // Manejo de acción de luz aquí
+        // Manejo de acción de luz
         break;
       }
     }
   }
-
   esperar(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
@@ -155,7 +139,6 @@ export class SimuladorTableroComponent {
   ngOnInit(): void {
     const id: string | null = this.route.snapshot.paramMap.get('id');
     if (!id) return;
-
     this.conectionBack.getTableroPorId(id).then(tablero => {
       if (!tablero) {
         alert('Tablero no encontrado');
@@ -232,16 +215,7 @@ export class SimuladorTableroComponent {
     if (base64 === null) {
       console.log("No hay audio.");
       return;
-    }
-    if (base64 instanceof File) {
-      try {
-        const base64String = await this.conectionBack.convertirBlobABase64(base64);
-        const audio = new window.Audio(base64String);
-        audio.play();
-      } catch (error) {
-        console.error('Error al convertir el archivo a base64:', error);
-      }
-    } else {
+    } else if (typeof base64 === 'string'){
       const audio = new window.Audio(base64);
       audio.play();
     }

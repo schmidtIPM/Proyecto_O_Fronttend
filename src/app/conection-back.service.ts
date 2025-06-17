@@ -10,21 +10,29 @@ import { isPlatformBrowser } from '@angular/common';
 export class ConectionBackService {
   private baseUrl = 'http://localhost:3000';
   constructor(@Inject(PLATFORM_ID) private platformId: Object) {}
-
+  isFilePath(fondo: string): boolean {
+    return /\.(png|jpg|jpeg|gif|webp)$/i.test(fondo);
+  }
   async guardarTablero(data: Tablero): Promise<any> {
     const formData = new FormData();
     formData.append('data', JSON.stringify(data));
-    data.mainTag.listaAcciones.forEach((accion, i) => {
-      if (accion.tipo === 'audio' && typeof (accion as any).archivo !== 'string') {
-        formData.append(`mainTag-${i}`, (accion as any).archivo as File);
-      }
-    });
+    const appendFondoIfFile = (fondo: string | File | undefined, key: string) => {
+      if (fondo instanceof File) {formData.append(key, fondo);}
+    };
+    appendFondoIfFile(data.fondo, 'tablero-fondo');
+    appendFondoIfFile(data.mainTag.fondo, 'mainTag-fondo');
     data.listaTags.forEach((tag, tagIndex) => {
+      appendFondoIfFile(tag.fondo, `tag-${tagIndex}-fondo`);
       tag.listaAcciones.forEach((accion, accionIndex) => {
         if (accion.tipo === 'audio' && typeof (accion as any).archivo !== 'string') {
           formData.append(`tag-${tagIndex}-accion-${accionIndex}`, (accion as any).archivo as File);
         }
       });
+    });
+    data.mainTag.listaAcciones.forEach((accion, i) => {
+      if (accion.tipo === 'audio' && typeof (accion as any).archivo !== 'string') {
+        formData.append(`mainTag-${i}`, (accion as any).archivo as File);
+      }
     });
     try {
       const response = await axios.post(`${this.baseUrl}/tablero/creartablero`, formData, {
@@ -62,8 +70,7 @@ export class ConectionBackService {
     try { 
       const response = await axios.get(`${this.baseUrl}/tablero/id/${id}`);
       const tableros: Tablero[] = [response.data];
-      await this.convertirAudios(tableros);
-      return this.reemplazarRutasConCache(tableros)[0];
+      return this.procesarRutas(tableros)[0];
     } catch (error) {
       console.error('Error al obtener el tablero con ID', id, error);
       return null;
@@ -73,47 +80,28 @@ export class ConectionBackService {
     try {
       const response = await axios.get(`${this.baseUrl}/tablero`);
       const tableros = response.data;
-      await this.convertirAudios(tableros);
-      return this.reemplazarRutasConCache(tableros);
+      console.log(tableros);
+      return this.procesarRutas(tableros);
     } catch (error) {
       console.error('Error al obtener tableros', error);
       return [];
     }
   }
-  private audioCache: Map<string, string> = new Map();
-  async convertirAudios(tableros: (Tablero|null)[]) {
-    for (const tablero of tableros) {
-      if (tablero !== null){
-      const tags = [tablero.mainTag, ...tablero.listaTags];
-      for (const tag of tags) {
-        for (const accion of tag.listaAcciones) {
-          if (accion.tipo === 'audio' && typeof (accion as any).archivo === 'string') {
-            const nombreArchivo = (accion as any).archivo.split('/').pop()!;
-            if (!this.audioCache.has(nombreArchivo)) {
-              try {
-                const blob = await axios.get(this.baseUrl + (accion as any).archivo, { responseType: 'blob' });
-                const base64 = await this.convertirBlobABase64(blob.data);
-                this.audioCache.set(nombreArchivo, base64);
-              } catch (err) {
-                console.error(`Error al convertir el audio ${nombreArchivo}`, err);
-              }
-            }
-          }
-        }
-      }
-    }
-    }
-  }
-  reemplazarRutasConCache(tableros: Tablero[]): Tablero[] {
+  procesarRutas(tableros: Tablero[]): Tablero[] {
     return tableros.map(tablero => {
+      if (tablero.fondo && typeof tablero.fondo === 'string' && this.isFilePath(tablero.fondo)){
+        tablero.fondo = this.baseUrl + tablero.fondo;
+        console.log(tablero.fondo);
+      } 
       const procesarTag = (tag: Tag) => {
+        if (tag.fondo && typeof tag.fondo === 'string' && this.isFilePath(tag.fondo)){
+          tag.fondo = this.baseUrl + tag.fondo;
+          console.log(tag.fondo);
+        } 
         tag.listaAcciones = tag.listaAcciones.map(accion => {
-          if (accion.tipo === 'audio' && typeof (accion as any).archivo === 'string') {
-            const nombreArchivo = (accion as any).archivo.split('/').pop();
-            const base64 = this.audioCache.get(nombreArchivo || '');
-            if (base64) {
-              (accion as any).archivo = base64;
-            }
+          if (accion.tipo === 'audio' && typeof (accion as Audio).archivo === 'string') {
+            (accion as Audio).archivo = this.baseUrl + (accion as Audio).archivo;
+            console.log((accion as Audio).archivo);
           }
           return accion;
         });
@@ -122,17 +110,6 @@ export class ConectionBackService {
       tablero.mainTag = procesarTag(tablero.mainTag);
       tablero.listaTags = tablero.listaTags.map(procesarTag);
       return tablero;
-    });
-  }
-  async convertirBlobABase64(blob: Blob): Promise<string> {
-    if (!isPlatformBrowser(this.platformId)) {
-      return '';
-    }
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result as string);
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
     });
   }
 }

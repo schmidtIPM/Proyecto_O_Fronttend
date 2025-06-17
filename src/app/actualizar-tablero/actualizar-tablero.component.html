@@ -53,8 +53,10 @@
         </div>
         <div *ngIf="nuevaAccion?.tipo === 'movimiento'">
           <p>Seleccionar acción:</p>
-          <button (click)="setDireccionMovimiento('avanzar')">Avanzar</button>
-          <button (click)="setDireccionMovimiento('girar')">Girar</button>
+          <button (click)="setDireccionMovimiento('arriba')">Avanzar</button>
+          <button (click)="setDireccionMovimiento('abajo')">Retroceder</button>
+          <button (click)="setDireccionMovimiento('derecha')">Girar D.</button>
+          <button (click)="setDireccionMovimiento('izquierda')">Girar I.</button>
           <p><strong>Elegido:</strong> {{ getDireccionMovimiento() }}</p>
         </div>
         <div *ngIf="luz">

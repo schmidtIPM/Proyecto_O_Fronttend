@@ -16,7 +16,7 @@ export class Audio extends Accion {
 }
 
 export class Movimiento extends Accion {
-  direccion: 'avanzar' | 'girar' = 'avanzar';
+  direccion: 'arriba' | 'abajo' | 'izquierda' | 'derecha' = 'arriba';
   constructor(id: number) {
     super();
     this.id = id;
@@ -41,6 +41,7 @@ export class Tag {
     public listaAcciones: Accion[], 
     public fila: number,
     public columna: number,
+    public fondo?: string | File,
     public _id?: string
   ) {}
 }
@@ -53,6 +54,7 @@ export class Tablero {
     public columnas: number,
     public mainTag: Tag,
     public listaTags: Tag[],
-    public _id?: string
+    public colorlineas?: string,
+    public fondo?: string | File
   ) {}
 }
