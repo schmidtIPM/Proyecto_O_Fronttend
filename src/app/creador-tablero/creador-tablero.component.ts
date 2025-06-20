@@ -27,6 +27,8 @@ export class CreadorTableroComponent {
   nuevaAccion: Accion | null = null;
   colorLineasTablero: string = "FFFFFF";
   fondoTablero: string | File = "FFFFFF"
+  colores: string[] = ['#f44336', '#4caf50', '#2196f3']; // Rojo, verde, azul
+
   
   constructor(private conectionBack: ConectionBackService) {}
 

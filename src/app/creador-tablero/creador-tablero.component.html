@@ -1,15 +1,21 @@
 <div class="p-4">
-  <div *ngIf="!tableroGenerado">
+  <div *ngIf="!tableroGenerado" class="crear-tablero">
     <h2>Crear Tablero</h2>
     <label>
       Nombre:
       <input [(ngModel)]="nombreTablero" />
     </label>
-    Filas:
-    <input type="number" [(ngModel)]="filas" min="1" />
-    Columnas:
-    <input type="number" [(ngModel)]="columnas" min="1" />
-    <button (click)="generarTablero()">Generar</button>
+    <div class="fila-columnas">
+      Filas:
+      <input type="number" [(ngModel)]="filas" min="1" />
+      Columnas:
+      <input type="number" [(ngModel)]="columnas" min="1" />
+    </div>
+    <label>
+      Distancia entre celdas:
+      <input type="text" placeholder="Distancia en centímetros" />
+    </label>
+    <button (click)="generarTablero()" style="font-weight: bold; font-size: larger;">Generar</button>
   </div>
   <div *ngIf="tableroGenerado">
     <h2>Tablero: {{ nombreTablero }}</h2>
@@ -45,30 +51,40 @@
       <h3>Celda: ({{ selectedCell.fila }}, {{ selectedCell.columna }})</h3>
       <button class="cerrar" (click)="cerrarPanel()">✕</button>
     </div>
-    <label>Agregar fondo:
-      <input type="file" accept=".png" (change)="onArchivoImagenChange($event)">
-    </label>
+    <label for="inputFondo" class="boton-fondo">Agregar fondo</label>
+    <input id="inputFondo" type="file" accept=".png" (change)="onArchivoImagenChange($event)" style="display: none;">
     <div class="agregar">
       <p><strong>Agregar acción:</strong></p>
-      <button *ngFor="let tipo of accionesDisponibles"
-              (click)="mostrarFormularioAccion(tipo)">
-        + {{ tipo }}
-      </button>
+      <div class="botones">
+        <button *ngFor="let tipo of accionesDisponibles; let i = index"
+                (click)="mostrarFormularioAccion(tipo)"
+                [ngStyle]="{ 'background-color': colores[i % colores.length] }">
+          + {{ tipo.charAt(0).toUpperCase() + tipo.slice(1) }}
+        </button>
+      </div>
     </div>
     <div *ngIf="nuevaAccion" class="formulario-accion">
-      <h4>Configurar acción: {{ nuevaAccion.tipo }}</h4>
+      <h4>Configurar acción: {{ nuevaAccion.tipo.charAt(0).toUpperCase() + nuevaAccion.tipo.slice(1) }}</h4>
       <div *ngIf="nuevaAccion?.tipo === 'audio'">
         <label>Archivo MP3:
           <input type="file" accept=".mp3" (change)="onArchivoAudioChange($event)">
         </label>
       </div>
-      <div *ngIf="nuevaAccion?.tipo === 'movimiento'">
+      <div *ngIf="nuevaAccion?.tipo === 'movimiento'" class ="movimiento">
         <p>Seleccionar acción:</p>
-        <button (click)="setDireccionMovimiento('arriba')">Avanzar</button>
-        <button (click)="setDireccionMovimiento('abajo')">Retroceder</button>
-        <button (click)="setDireccionMovimiento('derecha')">Girar D.</button>
-        <button (click)="setDireccionMovimiento('izquierda')">Girar I.</button>
-        <p><strong>Elegido:</strong> {{ getDireccionMovimiento() }}</p>
+        <button (click)="setDireccionMovimiento('arriba')"
+        [ngStyle]="{ 'background-color': '#f44336', color: 'black' }">↑</button>
+
+        <button (click)="setDireccionMovimiento('abajo')"
+        [ngStyle]="{ 'background-color': '#2196f3', color: 'black' }">↓</button>
+
+        <button (click)="setDireccionMovimiento('derecha')"
+        [ngStyle]="{ 'background-color': '#f5d718', color: 'black' }">⟳</button>
+
+        <button (click)="setDireccionMovimiento('izquierda')"
+        [ngStyle]="{ 'background-color': '#4caf50', color: 'black' }">⟲</button>
+
+        <!-- <p><strong>Elegido:</strong> {{ getDireccionMovimiento() }}</p> -->
       </div>
       <div *ngIf="luz">
         <input type="color" [(ngModel)]="luz.color">
