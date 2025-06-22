@@ -12,95 +12,110 @@
       <input type="number" [(ngModel)]="columnas" min="1" />
     </div>
     <label>
-      Distancia entre celdas:
-      <input type="text" placeholder="Distancia en centímetros" />
+      <div class="distancia-celdas">
+        Distancia entre celdas (cm):
+        <input type="number"/>
+    </div>
     </label>
     <button (click)="generarTablero()" style="font-weight: bold; font-size: larger;">Generar</button>
   </div>
   <div *ngIf="tableroGenerado">
-    <h2>Tablero: {{ nombreTablero }}</h2>
+    <!-- <h2>Tablero: {{ nombreTablero }}</h2> -->
   </div>
   <div *ngIf="tableroGrid.length" class="contenedor-tablero-panel">
-  <div class="tablero-container">
-    <div *ngIf="mostrarZoom" style="margin-bottom: 1rem;">
-      Zoom:
-      <button (click)="zoomIn()">+</button>
-      <button (click)="zoomOut()">−</button>
-      <button *ngIf="zoomLevel != 1" (click)="zoomReset()">Reset</button>
-    </div>
-    <div class="tablero-wrapper">
-      <div class="tablero-zoom" [ngStyle]="{ transform: 'scale(' + zoomLevel + ')' }">
-        <table>
-          <tr *ngFor="let fila of tableroGrid; let i = index">
-            <td *ngFor="let celda of fila; let j = index"
+    <div class="tablero-container">
+      <div *ngIf="mostrarZoom" style="margin-bottom: 1rem;">
+        Zoom:
+        <button (click)="zoomIn()">+</button>
+        <button (click)="zoomOut()">−</button>
+        <button *ngIf="zoomLevel != 1" (click)="zoomReset()">Reset</button>
+      </div>
+      <div class="tablero-wrapper">
+        <div class="tablero-zoom" [ngStyle]="{ transform: 'scale(' + zoomLevel + ')' }">
+          <table>
+            <tr *ngFor="let fila of tableroGrid; let i = index">
+              <td *ngFor="let celda of fila; let j = index"
                 (click)="seleccionarCelda(i, j)">
-              <div class="celda" [ngStyle]="getEstiloFondo(i, j)">
-                <div>
-                  <p id="masTablero">+</p>
+                <div class="celda" [ngStyle]="getEstiloCelda(i, j)">
+                  <div>
+                    <p id="masTablero">+</p>
+                  </div>
                 </div>
-              </div>
-            </td>
-          </tr>
-        </table>
+              </td>
+            </tr>
+          </table>
+        </div>
+      </div>
+      <button (click)="guardarTablero()">Guardar Tablero</button>
+    </div>
+
+    <div class="panel-lateral">
+      <h2>Tablero: {{ nombreTablero }}</h2>
+      <div *ngIf="!selectedCell" class="panel-lateral-sin-celda">
+        <h2>Panel de acciones</h2>
+        <p>Selecciona una celda del tablero para ver o editar sus acciones.</p>
+      </div>
+      <div *ngIf="selectedCell">
+        <div class="panel-header">
+        <h3>Celda: ({{ selectedCell.fila }}, {{ selectedCell.columna }})</h3>
+        <hr style="border: none; height: 1px; background-color: #b4b4b4; width: 100%; margin: 0.5rem 0;">
+        <!-- <button class="cerrar" (click)="cerrarPanel()">✕</button> -->
+        </div>
+      <label for="inputFondo" class="boton-browse">Agregar fondo</label>
+      <input id="inputFondo" type="file" accept=".png" (change)="onArchivoImagenChange($event)" style="display: none;">
+      
+      <div class="agregar">
+        <p><strong>Agregar acción:</strong></p>
+        <div class="botones">
+          <button *ngFor="let tipo of accionesDisponibles; let i = index"
+                  (click)="mostrarFormularioAccion(tipo)"
+                  [ngStyle]="{ 'background-color': colores[i % colores.length] }">
+            + {{ tipo.charAt(0).toUpperCase() + tipo.slice(1) }}
+          </button>
+        </div>
+      </div>
+      <div *ngIf="nuevaAccion" class="formulario-accion">
+        <h4>Configurar acción: {{ nuevaAccion.tipo.charAt(0).toUpperCase() + nuevaAccion.tipo.slice(1) }}</h4>
+        <div *ngIf="nuevaAccion?.tipo === 'audio'" class="luz">
+          <label for="audioInput" class="boton-browse">Agregar archivo MP3</label>
+          <input id="audioInput" type="file" accept=".mp3" (change)="onArchivoAudioChange($event)" style="display: none;">
+        </div>
+        <div *ngIf="nuevaAccion?.tipo === 'movimiento'" class ="movimiento">
+          <p>Seleccionar acción:</p>
+          <button (click)="setDireccionMovimiento('arriba')"
+          [ngStyle]="{ 'background-color': '#FF7F50', color: 'white' }">↑</button>
+
+          <button (click)="setDireccionMovimiento('abajo')"
+          [ngStyle]="{ 'background-color': '#3498DB', color: 'white' }">↓</button>
+
+          <button (click)="setDireccionMovimiento('derecha')"
+          [ngStyle]="{ 'background-color': '#2980B9', color: 'white' }">⟳</button>
+
+          <button (click)="setDireccionMovimiento('izquierda')"
+          [ngStyle]="{ 'background-color': '#20B2AA', color: 'white' }">⟲</button>
+
+          <!-- <p><strong>Elegido:</strong> {{ getDireccionMovimiento() }}</p> -->
+        </div>
+        <div *ngIf="luz" class = "luz">
+          <input type="color" [(ngModel)]="luz.color">
+          <div>
+            <label>Intervalo (ms):</label>
+            <input type="number" [(ngModel)]="luz.intervalo">
+          </div>
+          <button (click)="setLuz(luz.color, luz.intervalo)">Agregar</button>
+        </div>
+
+      </div>
+      <div class="preview">
+        <p><strong>Acciones actuales:</strong></p>
+        <ul>
+          <li *ngFor="let accion of tableroGrid[selectedCell.fila][selectedCell.columna].acciones"
+          [ngClass]="'accion-' + accion.constructor.name">
+            {{ getDescripcionAccion(accion) }}
+          </li>
+        </ul>
       </div>
     </div>
-    <button (click)="guardarTablero()">Guardar Tablero</button>
   </div>
-  <div *ngIf="selectedCell" class="panel-lateral">
-    <div class="panel-header">
-      <h3>Celda: ({{ selectedCell.fila }}, {{ selectedCell.columna }})</h3>
-      <button class="cerrar" (click)="cerrarPanel()">✕</button>
-    </div>
-    <label for="inputFondo" class="boton-fondo">Agregar fondo</label>
-    <input id="inputFondo" type="file" accept=".png" (change)="onArchivoImagenChange($event)" style="display: none;">
-    <div class="agregar">
-      <p><strong>Agregar acción:</strong></p>
-      <div class="botones">
-        <button *ngFor="let tipo of accionesDisponibles; let i = index"
-                (click)="mostrarFormularioAccion(tipo)"
-                [ngStyle]="{ 'background-color': colores[i % colores.length] }">
-          + {{ tipo.charAt(0).toUpperCase() + tipo.slice(1) }}
-        </button>
-      </div>
-    </div>
-    <div *ngIf="nuevaAccion" class="formulario-accion">
-      <h4>Configurar acción: {{ nuevaAccion.tipo.charAt(0).toUpperCase() + nuevaAccion.tipo.slice(1) }}</h4>
-      <div *ngIf="nuevaAccion?.tipo === 'audio'">
-        <label>Archivo MP3:
-          <input type="file" accept=".mp3" (change)="onArchivoAudioChange($event)">
-        </label>
-      </div>
-      <div *ngIf="nuevaAccion?.tipo === 'movimiento'" class ="movimiento">
-        <p>Seleccionar acción:</p>
-        <button (click)="setDireccionMovimiento('arriba')"
-        [ngStyle]="{ 'background-color': '#f44336', color: 'black' }">↑</button>
-
-        <button (click)="setDireccionMovimiento('abajo')"
-        [ngStyle]="{ 'background-color': '#2196f3', color: 'black' }">↓</button>
-
-        <button (click)="setDireccionMovimiento('derecha')"
-        [ngStyle]="{ 'background-color': '#f5d718', color: 'black' }">⟳</button>
-
-        <button (click)="setDireccionMovimiento('izquierda')"
-        [ngStyle]="{ 'background-color': '#4caf50', color: 'black' }">⟲</button>
-
-        <!-- <p><strong>Elegido:</strong> {{ getDireccionMovimiento() }}</p> -->
-      </div>
-      <div *ngIf="luz">
-        <input type="color" [(ngModel)]="luz.color">
-        <input type="number" [(ngModel)]="luz.intervalo">
-        <button (click)="setLuz(luz.color, luz.intervalo)">Agregar</button>
-      </div>
-
-    </div>
-    <div class="preview">
-      <p><strong>Acciones actuales:</strong></p>
-      <ul>
-        <li *ngFor="let accion of tableroGrid[selectedCell.fila][selectedCell.columna].acciones">
-          {{ getDescripcionAccion(accion) }}
-        </li>
-      </ul>
-    </div>
   </div>
-</div>
 </div>

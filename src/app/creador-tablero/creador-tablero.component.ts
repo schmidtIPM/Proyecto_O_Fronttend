@@ -27,7 +27,7 @@ export class CreadorTableroComponent {
   nuevaAccion: Accion | null = null;
   colorLineasTablero: string = "FFFFFF";
   fondoTablero: string | File = "FFFFFF"
-  colores: string[] = ['#f44336', '#4caf50', '#2196f3']; // Rojo, verde, azul
+  colores: string[] = ['#1479e4', '#A7D129', '#FF7F50'];
 
   
   constructor(private conectionBack: ConectionBackService) {}
@@ -116,7 +116,8 @@ export class CreadorTableroComponent {
     }
     event.target.value=null;
   }
-  getEstiloFondo(fila: number, columna: number): { [key: string]: string } {
+  
+  /* getEstiloFondo(fila: number, columna: number): { [key: string]: string } {
     const tag = this.tagGrid.find(t => t.fila === fila && t.columna === columna);
     if (!tag || !tag.fondo) return {};
 
@@ -129,7 +130,8 @@ export class CreadorTableroComponent {
       'background-size': 'cover',
       'background-position': 'center'
     };
-  }
+  } */
+
   onArchivoAudioChange(event: any) {
     const file = event.target.files[0];
     if (file && this.nuevaAccion instanceof Audio) {
@@ -223,12 +225,62 @@ export class CreadorTableroComponent {
   }
   getDescripcionAccion(accion: Accion): string {
     if (accion instanceof Audio) {
-      return `Audio: ${accion.archivo ? (accion.archivo instanceof File ? accion.archivo.name : accion.archivo) : 'No seleccionado'}`;
+      return `𝗔𝘂𝗱𝗶𝗼: ${accion.archivo ? (accion.archivo instanceof File ? accion.archivo.name : accion.archivo) : 'No seleccionado'}`;
     } else if (accion instanceof Movimiento) {
-      return `Movimiento: ${accion.direccion}`;
+      return `𝗠𝗼𝘃𝗶𝗺𝗶𝗲𝗻𝘁𝗼: ${accion.direccion.charAt(0).toUpperCase() + accion.direccion.slice(1)}`;
     } else if (accion instanceof Luz) {
-      return `Luz: Color ${accion.color}, Intervalo ${accion.intervalo} ms`;
+      return `𝗟𝘂𝘇: Color ${accion.color.toUpperCase()}, Intervalo ${accion.intervalo} ms`;
     }
     return 'Acción desconocida';
+  }
+
+  getEstiloCelda(fila: number, columna: number): any {
+    const tag = this.tagGrid.find(t => t.fila === fila && t.columna === columna);
+    if (tag && tag.fondo) {
+      const url = typeof tag.fondo === 'string' ? tag.fondo : URL.createObjectURL(tag.fondo);
+      return {
+        'background-image': `url(${url})`,
+        'background-size': 'cover',
+        'background-position': 'center'
+      };
+    }
+
+    // si no hay fondo pongo los colores de las acciones
+    const acciones = this.tableroGrid[fila][columna].acciones;
+    const coloresAccion: string[] = [];
+
+    for (const accion of acciones) {
+      const tipo = accion.constructor.name;
+
+      if (tipo === 'Audio2') {
+        coloresAccion.push(this.colores[0]);
+      } else if (tipo === 'Movimiento') {
+        coloresAccion.push(this.colores[1]);
+      } else if (tipo === 'Luz') {
+        const colorLuz = this.colores[2];
+        coloresAccion.push(colorLuz);
+      }
+    }
+
+    if (coloresAccion.length === 0) {
+      return {}; // sin estilo
+    }
+  
+    if (coloresAccion.length === 1) {
+      return { 'background-color': coloresAccion[0] };
+    }
+  
+    // calculo para franjas iguales
+    const n = coloresAccion.length;
+    let gradiente = 'linear-gradient(to bottom, ';
+    coloresAccion.forEach((color, index) => {
+      const inicio = (index / n) * 100;
+      const final = ((index + 1) / n) * 100;
+      gradiente += `${color} ${inicio}%, ${color} ${final}%`;
+      if (index !== n - 1) gradiente += ', ';
+    });
+    gradiente += ')';
+  
+    return { background: gradiente };
   }
 }
