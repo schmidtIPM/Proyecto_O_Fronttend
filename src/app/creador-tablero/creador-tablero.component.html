@@ -32,11 +32,11 @@
       </div>
       <div class="tablero-wrapper">
         <div class="tablero-zoom" [ngStyle]="{ transform: 'scale(' + zoomLevel + ')' }">
-          <table>
+          <table [ngStyle]="getFondoTablero()">
             <tr *ngFor="let fila of tableroGrid; let i = index">
               <td *ngFor="let celda of fila; let j = index"
                 (click)="seleccionarCelda(i, j)">
-                <div class="celda" [ngStyle]="getEstiloCelda(i, j)">
+                <div class="celda" [ngStyle]="getEstiloCelda(i, j)" style="background: transparent;">
                   <div>
                     <p id="masTablero">+</p>
                   </div>
@@ -51,19 +51,27 @@
 
     <div class="panel-lateral">
       <h2>Tablero: {{ nombreTablero }}</h2>
+      <!-- BOTON FONDO Y COLOR DE LINEA -->
       <div *ngIf="!selectedCell" class="panel-lateral-sin-celda">
+        <label for="inputFondo" class="boton-browse">Agregar fondo</label>
+        <input id="inputFondo" type="file" accept=".png" (change)="onArchivoImagenChange($event)" style="display: none;">
+        <button mat-raised-button color="primary" class="boton-paint" (click)="paint()">Abrir Paint</button>
+
         <h2>Panel de acciones</h2>
         <p>Selecciona una celda del tablero para ver o editar sus acciones.</p>
       </div>
       <div *ngIf="selectedCell">
         <div class="panel-header">
-        <h3>Celda: ({{ selectedCell.fila }}, {{ selectedCell.columna }})</h3>
-        <hr style="border: none; height: 1px; background-color: #b4b4b4; width: 100%; margin: 0.5rem 0;">
-        <!-- <button class="cerrar" (click)="cerrarPanel()">✕</button> -->
+        <div style="display: flex; justify-content: space-between; width: 100%;">
+          <h3>Celda: ({{ selectedCell.fila }}, {{ selectedCell.columna }})</h3>
+          <button class="cerrar" (click)="cerrarPanel()">✕</button>
         </div>
+        <hr style="border: none; height: 1px; background-color: #b4b4b4; width: 100%; margin: 0.5rem 0;">
+      </div>
       <label for="inputFondo" class="boton-browse">Agregar fondo</label>
       <input id="inputFondo" type="file" accept=".png" (change)="onArchivoImagenChange($event)" style="display: none;">
       
+      <button mat-raised-button color="primary" class="boton-paint" (click)="paint()">Abrir Paint</button>
       <div class="agregar">
         <p><strong>Agregar acción:</strong></p>
         <div class="botones">

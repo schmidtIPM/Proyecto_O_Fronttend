@@ -3,6 +3,10 @@ import { Accion, Audio, Movimiento, Luz, Tablero, Tag } from '../models';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ConectionBackService } from '../conection-back.service';
+import { ElementRef, ViewChild, AfterViewInit } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
+import { MiniPaintComponent } from '../mini-paint/mini-paint.component';
+
 @Component({
   standalone: true,
   selector: 'app-creador-tablero',
@@ -28,9 +32,10 @@ export class CreadorTableroComponent {
   colorLineasTablero: string = "FFFFFF";
   fondoTablero: string | File = "FFFFFF"
   colores: string[] = ['#1479e4', '#A7D129', '#FF7F50'];
+  showPopup = false;
 
   
-  constructor(private conectionBack: ConectionBackService) {}
+  constructor(private conectionBack: ConectionBackService, private dialog: MatDialog) {}
 
   generarTablero() {
     this.tableroGrid = Array.from({ length: this.filas }, () =>
@@ -97,8 +102,21 @@ export class CreadorTableroComponent {
       this.nuevaAccion = null;
     }
   }
+
   onArchivoImagenChange(event: any) {
-    const file = event.target.files[0];
+    console.log(event);
+    let file;
+    if (event instanceof File) {
+     file = event;
+    }
+    else {
+      file = event.target.files[0];
+    }
+    if (!this.selectedCell){
+      this.fondoTablero = file;
+      event.target.value=null;
+      return;
+    }
     for (var tag of this.tagGrid) {
       if(this.selectedCell?.fila == tag.fila && this.selectedCell.columna == tag.columna){
         if (file) {
@@ -116,21 +134,6 @@ export class CreadorTableroComponent {
     }
     event.target.value=null;
   }
-  
-  /* getEstiloFondo(fila: number, columna: number): { [key: string]: string } {
-    const tag = this.tagGrid.find(t => t.fila === fila && t.columna === columna);
-    if (!tag || !tag.fondo) return {};
-
-    const url = typeof tag.fondo === 'string'
-      ? tag.fondo
-      : URL.createObjectURL(tag.fondo);
-
-    return {
-      'background-image': `url(${url})`,
-      'background-size': 'cover',
-      'background-position': 'center'
-    };
-  } */
 
   onArchivoAudioChange(event: any) {
     const file = event.target.files[0];
@@ -244,14 +247,10 @@ export class CreadorTableroComponent {
         'background-position': 'center'
       };
     }
-
-    // si no hay fondo pongo los colores de las acciones
     const acciones = this.tableroGrid[fila][columna].acciones;
     const coloresAccion: string[] = [];
-
     for (const accion of acciones) {
       const tipo = accion.constructor.name;
-
       if (tipo === 'Audio2') {
         coloresAccion.push(this.colores[0]);
       } else if (tipo === 'Movimiento') {
@@ -261,16 +260,12 @@ export class CreadorTableroComponent {
         coloresAccion.push(colorLuz);
       }
     }
-
     if (coloresAccion.length === 0) {
-      return {}; // sin estilo
+      return {};
     }
-  
     if (coloresAccion.length === 1) {
       return { 'background-color': coloresAccion[0] };
     }
-  
-    // calculo para franjas iguales
     const n = coloresAccion.length;
     let gradiente = 'linear-gradient(to bottom, ';
     coloresAccion.forEach((color, index) => {
@@ -280,7 +275,34 @@ export class CreadorTableroComponent {
       if (index !== n - 1) gradiente += ', ';
     });
     gradiente += ')';
-  
     return { background: gradiente };
   }
+  getFondoTablero() {
+    const fondo = this.fondoTablero;
+
+    if (!fondo) return {};
+    if (typeof fondo === 'string' && /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(fondo)) {
+      return {
+        'background-color': fondo
+      };
+    }
+    const url = typeof fondo === 'string' ? fondo : URL.createObjectURL(fondo);
+    return {
+      'background-image': `url(${url})`,
+      'background-size': 'cover',
+      'background-position': 'center'
+    };
+  }
+
+  paint() {
+    const dialogRef = this.dialog.open(MiniPaintComponent, {
+      width: '520px',
+      height: '500px'
+    });
+
+     dialogRef.afterClosed().subscribe(result => {
+      this.onArchivoImagenChange(result)
+     });
+  }
+
 }

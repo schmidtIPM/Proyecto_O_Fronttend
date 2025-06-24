@@ -186,7 +186,6 @@ td {
 
 .panel-header h3 {
   font-size: medium;
-  margin-bottom: 0rem;
 }
 
 .cerrar {
@@ -281,6 +280,19 @@ td {
   text-align: center;
 }
 
+.boton-paint {
+  display: inline-block;
+  background-color: #1479e4;
+  color: white;
+  padding: 10px 16px;
+  border-radius: 0.3rem;
+  cursor: pointer;
+  text-align: center;
+  border: 0;
+  font-size: medium;
+  margin: 1rem;
+}
+
 ul li.accion-Luz {
   color: #FF7F50;
 }
@@ -292,4 +304,11 @@ ul li.accion-Movimiento {
 ul li.accion-Audio2 {
   color: #3498DB;
 }
+
+canvas {
+  border: 1px solid black;
+  width: 500px;
+  height: 400px;
+}
+
 
