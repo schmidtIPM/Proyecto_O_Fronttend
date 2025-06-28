@@ -10,10 +10,14 @@ import { CommonModule } from '@angular/common';
 })
 export class MisTablerosComponent {
   constructor(private conectionBack: ConectionBackService) {}
+
   tableros: any[] = [];
+  celdasVacias = Array(9); 
+
   ngOnInit() {
     this.cargarTableros();
   }
+
   async cargarTableros() {
     try {
       const response = await this.conectionBack.getTablero();
@@ -22,10 +26,12 @@ export class MisTablerosComponent {
       console.error('Error al cargar los tableros:', error);
     }
   }
+
   reproducirAudio(base64: string) {
     const audio = new Audio(base64);
     audio.play();
   }
+
   async eliminarTablero(id: number) {
     try {
       const response = await this.conectionBack.eliminarTablero(id);

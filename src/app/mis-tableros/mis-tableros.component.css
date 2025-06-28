@@ -1,0 +1,27 @@
+.tablero-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  justify-content: center;
+}
+
+.tablero {
+  text-align: center;
+}
+
+.tablero-preview {
+  width: 300px;
+  height: 300px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  border: 2px solid #444;
+  margin-top: 10px;
+  box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
+  background-size: cover;
+  background-position: center;ppp
+}
+
+.celda {
+  border: 1px solid rgba(0, 0, 0, 0.2);
+}

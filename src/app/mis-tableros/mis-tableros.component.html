@@ -1,24 +1,20 @@
-<div class="tablero-container">
+<div class="tablero-container"> 
   <div class="tablero" *ngFor="let tablero of tableros">
-    <h3>Tablero #{{ tablero.id }}</h3>
+    <h3>{{ tablero.nombre }}</h3>
     <button (click)="eliminarTablero(tablero.id)">🗑 Eliminar</button>
-    <div>
-      <h4>Main Tag</h4>
-      <div *ngFor="let accion of tablero.mainTag.listaAcciones">
-        <div *ngIf="accion.tipo === 'audio' && accion.archivo">
-          <button (click)="reproducirAudio(accion.archivo)">🔊 Reproducir Audio</button>
-        </div>
-      </div>
-    </div>
-    <div *ngFor="let tag of tablero.listaTags">
-      <h4>Tag: {{ tag.nombre || tag.id }}</h4>
-      <div *ngFor="let accion of tag.listaAcciones">
-        <div *ngIf="accion.tipo === 'audio' && accion.archivo">
-          <button (click)="reproducirAudio(accion.archivo)">🔊 Reproducir Audio</button>
-        </div>
-      </div>
+
+    <div
+      class="tablero-preview"
+      [ngStyle]="{
+        'background-image': 'url(' + tablero.fondo + ')',
+        'background-size': 'cover',
+        'background-position': 'center'
+      }"
+    >
+      <div class="celda" *ngFor="let celda of celdasVacias"></div>
     </div>
   </div>
+
   <div class="tablero" *ngIf="!tableros.length">
     <p>No hay tableros disponibles.</p>
   </div>
