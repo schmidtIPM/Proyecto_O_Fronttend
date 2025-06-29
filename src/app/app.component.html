@@ -1,8 +1,10 @@
-<header>
-    <button (click)="irACreador()">Ir al Creador</button>
-    <button (click)="irAActualizar()">Ir al Actualizador</button>
-    <button (click)="irASimular()">Ir al Simulador</button>
-    <button (click)="irAHome()">Ir al Home</button>
+<header class="app-header">
+  <div class="logo">
+    <img src="https://brandlogos.net/wp-content/uploads/2013/06/winx-club-vector-logo.png" alt="Proyecto O">
+  </div>
+  <nav class="nav-buttons">
+    <button (click)="irACreador()">Creador</button>
+    <button (click)="irAHome()">Home</button>
+  </nav>
 </header>
 <router-outlet></router-outlet>
-

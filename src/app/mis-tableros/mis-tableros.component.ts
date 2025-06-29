@@ -50,4 +50,9 @@ export class MisTablerosComponent {
   irAEditarTablero(id: string) {
     this.router.navigate(['/actualizador-de-tableros', id]);
   }
+
+  irASimularTablero(id: string) {
+  this.router.navigate(['/tablero', id]);
+}
+
 }

@@ -40,13 +40,19 @@
 }
 
 .crear-tablero button {
-  background-color: #007bff;
+  background-color: #FF7F50;
   color: white;
   padding: 10px;
   border: none;
   border-radius: 6px;
   cursor: pointer;
 }
+
+.crear-tablero button:hover {
+    background-color: #e47148;
+
+}
+
 
 .contenedor-tablero-panel {
   gap: 1rem;

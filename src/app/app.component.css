@@ -1,0 +1,63 @@
+
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+app-root {
+  display: block;
+  margin: 0;
+  padding: 0;
+}
+
+
+header{
+  box-sizing: border-box;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  background-color: #2c83e0;
+  padding: 10px 20px;
+  color: white;
+  height: auto;
+  gap: 10px
+}
+
+.logo {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.logo img {
+  height: 60px;
+  width: 60px;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+
+.nav-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-right: 1%;
+  flex-wrap: wrap;
+}
+
+.nav-buttons button {
+  background-color: #A7D129;
+  border: none;
+  color: white;
+  padding: 0.5rem 1rem;
+  font-weight: bold;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.nav-buttons button:hover {
+  background-color: #95bb24;
+}

@@ -48,7 +48,7 @@
 }
 
 .btn-eliminar {
-  background-color: #3498DB;
+  background-color: #FF7F50;
   color: white;
   border: none;
   padding: 0.5rem 1rem;
@@ -59,11 +59,11 @@
 }
 
 .btn-eliminar:hover {
-  background-color: #A7D129;
+  background-color: #e07148;
 }
 
 .btn-editar {
-  background-color: #3498db;
+  background-color: #FF7F50;
   color: white;
   border: none;
   padding: 0.5rem 1rem;
@@ -75,6 +75,23 @@
 }
 
 .btn-editar:hover {
-  background-color: #A7D129;
+  background-color: #e07148;
 }
+
+.btn-simulador {
+  background-color: #FF7F50;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 4px;
+  margin-left: 0.5rem;
+  transition: background-color 0.3s;
+}
+
+.btn-simulador:hover {
+  background-color: #e07148;
+}
+
 
