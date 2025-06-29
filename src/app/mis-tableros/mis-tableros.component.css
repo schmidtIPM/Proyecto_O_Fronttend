@@ -1,27 +1,80 @@
-.tablero-container {
+.cards-container {
   display: flex;
   flex-wrap: wrap;
-  gap: 2rem;
   justify-content: center;
+  gap: 2rem;
+  padding: 2rem;
 }
 
-.tablero {
-  text-align: center;
-}
-
-.tablero-preview {
+.card {
   width: 300px;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #fff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.card-preview {
+  width: 100%;
   height: 300px;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: repeat(3, 1fr);
-  border: 2px solid #444;
-  margin-top: 10px;
-  box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
+  background-color: #f9f9f9;
+  border-bottom: 1px solid #ccc;
+  background-repeat: no-repeat;
   background-size: cover;
-  background-position: center;ppp
+  background-position: center;
 }
 
 .celda {
   border: 1px solid rgba(0, 0, 0, 0.2);
 }
+
+.card-body {
+  padding: 1rem;
+  text-align: center;
+  width: 100%;
+}
+
+.card-body h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1.2rem;
+  font-weight: bold;
+  font-family: 'Arial'
+}
+
+.btn-eliminar {
+  background-color: #3498DB;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.3s;
+}
+
+.btn-eliminar:hover {
+  background-color: #A7D129;
+}
+
+.btn-editar {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 4px;
+  margin-left: 0.5rem;
+  transition: background-color 0.3s;
+}
+
+.btn-editar:hover {
+  background-color: #A7D129;
+}
+

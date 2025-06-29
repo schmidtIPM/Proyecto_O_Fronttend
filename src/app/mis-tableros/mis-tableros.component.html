@@ -1,21 +1,26 @@
-<div class="tablero-container"> 
-  <div class="tablero" *ngFor="let tablero of tableros">
-    <h3>{{ tablero.nombre }}</h3>
-    <button (click)="eliminarTablero(tablero.id)">🗑 Eliminar</button>
+
+<div class="cards-container">
+  <div class="card" *ngFor="let tablero of tableros">
 
     <div
-      class="tablero-preview"
+      class="card-preview"
       [ngStyle]="{
-        'background-image': 'url(' + tablero.fondo + ')',
+        'background-image': tablero.fondo ? 'url(' + tablero.fondo + ')' : 'none',
         'background-size': 'cover',
         'background-position': 'center'
       }"
     >
       <div class="celda" *ngFor="let celda of celdasVacias"></div>
     </div>
+
+    <div class="card-body">
+      <h3>{{ tablero.nombre }}</h3>
+      <button class="btn-eliminar" (click)="eliminarTablero(tablero.id)">Eliminar</button>
+      <button class="btn-editar" (click)="irAEditarTablero(tablero._id)">Editar</button>
+    </div>
   </div>
 
-  <div class="tablero" *ngIf="!tableros.length">
+  <div *ngIf="!tableros.length" style="margin-top: 2rem;">
     <p>No hay tableros disponibles.</p>
   </div>
 </div>

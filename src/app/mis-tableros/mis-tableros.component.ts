@@ -1,15 +1,20 @@
 import { Component } from '@angular/core';
 import { ConectionBackService } from '../conection-back.service';
 import { CommonModule } from '@angular/common';
+import { RouterModule, Router } from '@angular/router';
 
 @Component({
   selector: 'app-mis-tableros',
-  imports: [CommonModule],
+  standalone: true,
+  imports: [CommonModule, RouterModule],
   templateUrl: './mis-tableros.component.html',
   styleUrl: './mis-tableros.component.css'
 })
 export class MisTablerosComponent {
-  constructor(private conectionBack: ConectionBackService) {}
+  constructor(
+    private conectionBack: ConectionBackService,
+    private router: Router 
+  ) {}
 
   tableros: any[] = [];
   celdasVacias = Array(9); 
@@ -40,5 +45,9 @@ export class MisTablerosComponent {
     } catch (error) {
       console.error('Error al eliminar el tablero:', error);
     }
+  }
+
+  irAEditarTablero(id: string) {
+    this.router.navigate(['/actualizador-de-tableros', id]);
   }
 }
