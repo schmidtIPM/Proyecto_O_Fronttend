@@ -31,37 +31,67 @@
         <button (click)="guardarTablero()">Guardar Tablero</button>
       </div>
     </div>
+        <div class="panel-lateral">
+      <h2>Tablero: {{ tablero.nombre }}</h2>
+      <!-- BOTON FONDO Y COLOR DE LINEA -->
+      <div *ngIf="!selectedCell" class="panel-lateral-sin-celda">
+        <label for="inputFondo" class="boton-browse">Agregar fondo</label>
+        <input id="inputFondo" type="file" accept=".png" (change)="onArchivoImagenChange($event)" style="display: none;">
+        <button mat-raised-button color="primary" class="boton-paint" (click)="paint()">Abrir Paint</button>
 
-    <div *ngIf="selectedCell" class="panel-lateral">
-      <div class="panel-header">
-        <h3>Celda: ({{ selectedCell.fila }}, {{ selectedCell.columna }})</h3>
-        <button class="cerrar" (click)="cerrarPanel()">✕</button>
+        <h2>Panel de acciones</h2>
+        <p>Selecciona una celda del tablero para ver o editar sus acciones.</p>
       </div>
+      <div *ngIf="selectedCell">
+        <div class="panel-header">
+        <div style="display: flex; justify-content: space-between; width: 100%;">
+          <h3>Celda: ({{ selectedCell.fila }}, {{ selectedCell.columna }})</h3>
+          <button class="cerrar" (click)="cerrarPanel()">✕</button>
+        </div>
+        <hr style="border: none; height: 1px; background-color: #b4b4b4; width: 100%; margin: 0.5rem 0;">
+      </div>
+      <label for="inputFondo" class="boton-browse">Agregar fondo</label>
+      <input id="inputFondo" type="file" accept=".png" (change)="onArchivoImagenChange($event)" style="display: none;">
+      
+      <button mat-raised-button color="primary" class="boton-paint" (click)="paint()">Abrir Paint</button>
       <div class="agregar">
         <p><strong>Agregar acción:</strong></p>
-        <button *ngFor="let tipo of accionesDisponibles"
-                (click)="mostrarFormularioAccion(tipo)">
-          + {{ tipo }}
-        </button>
+        <div class="botones">
+          <button *ngFor="let tipo of accionesDisponibles; let i = index"
+                  (click)="mostrarFormularioAccion(tipo)"
+                  [ngStyle]="{ 'background-color': colores[i % colores.length] }">
+            + {{ tipo.charAt(0).toUpperCase() + tipo.slice(1) }}
+          </button>
+        </div>
       </div>
       <div *ngIf="nuevaAccion" class="formulario-accion">
-        <h4>Configurar acción: {{ nuevaAccion.tipo }}</h4>
-        <div *ngIf="nuevaAccion?.tipo === 'audio'">
-          <label>Archivo MP3:
-            <input type="file" accept=".mp3" (change)="onArchivoAudioChange($event)">
-          </label>
+        <h4>Configurar acción: {{ nuevaAccion.tipo.charAt(0).toUpperCase() + nuevaAccion.tipo.slice(1) }}</h4>
+        <div *ngIf="nuevaAccion?.tipo === 'audio'" class="luz">
+          <label for="audioInput" class="boton-browse">Agregar archivo MP3</label>
+          <input id="audioInput" type="file" accept=".mp3" (change)="onArchivoAudioChange($event)" style="display: none;">
         </div>
-        <div *ngIf="nuevaAccion?.tipo === 'movimiento'">
+        <div *ngIf="nuevaAccion?.tipo === 'movimiento'" class ="movimiento">
           <p>Seleccionar acción:</p>
-          <button (click)="setDireccionMovimiento('arriba')">Avanzar</button>
-          <button (click)="setDireccionMovimiento('abajo')">Retroceder</button>
-          <button (click)="setDireccionMovimiento('derecha')">Girar D.</button>
-          <button (click)="setDireccionMovimiento('izquierda')">Girar I.</button>
-          <p><strong>Elegido:</strong> {{ getDireccionMovimiento() }}</p>
+          <button (click)="setDireccionMovimiento('arriba')"
+          [ngStyle]="{ 'background-color': '#FF7F50', color: 'white' }">↑</button>
+
+          <button (click)="setDireccionMovimiento('abajo')"
+          [ngStyle]="{ 'background-color': '#3498DB', color: 'white' }">↓</button>
+
+          <button (click)="setDireccionMovimiento('derecha')"
+          [ngStyle]="{ 'background-color': '#2980B9', color: 'white' }">⟳</button>
+
+          <button (click)="setDireccionMovimiento('izquierda')"
+          [ngStyle]="{ 'background-color': '#20B2AA', color: 'white' }">⟲</button>
+
+          <!-- <p><strong>Elegido:</strong> {{ getDireccionMovimiento() }}</p> -->
         </div>
-        <div *ngIf="luz">
+        <div *ngIf="luz" class = "luz">
           <input type="color" [(ngModel)]="luz.color">
-          <input type="number" [(ngModel)]="luz.intervalo">
+          <div>
+            <label>Intervalo (ms):</label>
+            <input type="number" [(ngModel)]="luz.intervalo">
+          </div>
           <button (click)="setLuz(luz.color, luz.intervalo)">Agregar</button>
         </div>
 
@@ -69,28 +99,18 @@
       <div class="preview">
         <p><strong>Acciones actuales:</strong></p>
         <ul>
-          <li *ngFor="let accion of tableroGrid[selectedCell!.fila][selectedCell!.columna].acciones" style="margin-bottom: 1em;">
-            <div>
-              {{ getDescripcionAccion(accion) }}
+          <li *ngFor="let accion of tableroGrid[selectedCell.fila][selectedCell.columna].acciones"
+          [ngClass]="'accion-' + accion.constructor.name">
+            {{ getDescripcionAccion(accion) }}
 
               <ng-container *ngIf="esAudio(accion)">
                 <button (click)="reproducirAudio(accion.archivo)">🔊</button>
               </ng-container>
               <button (click)="eliminarAccion(accion)" style="float: right;">X</button>
-            </div>
-
-            <div style="display: flex; align-items: center; gap: 0.5em; margin-top: 0.3em;">
-              <label style="font-size: 0.9em;">Delay:</label>
-              <input type="number" [(ngModel)]="accion.delay" style="width: 4em;" min="0">
-              <span style="font-size: 0.9em;">segundos</span>
-            </div>
           </li>
-
         </ul>
       </div>
     </div>
-  </div>
-
   <div *ngIf="!cargando && !tableroGrid.length">
     <p>No hay acciones cargadas para este tablero.</p>
   </div>

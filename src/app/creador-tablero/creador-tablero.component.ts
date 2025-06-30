@@ -26,7 +26,6 @@ export class CreadorTableroComponent {
   zoomLevel = 1;
   mostrarZoom = false;
   selectedCell: { fila: number; columna: number } | null = null;
-  robotPos: { fila: number; columna: number } = { fila: 0, columna: 0 };
   panelStyles = {};
   nuevaAccion: Accion | null = null;
   colorLineasTablero: string = "FFFFFF";
@@ -41,10 +40,33 @@ export class CreadorTableroComponent {
     this.tableroGrid = Array.from({ length: this.filas }, () =>
       Array.from({ length: this.columnas }, () => ({ acciones: [] }))
     );
-    this.robotPos = { fila: 0, columna: 0 };
     this.selectedCell = null;
     this.verificarTamanioCeldas();
     this.tableroGenerado = true;
+  }
+  esAudio(accion: Accion): accion is Audio {
+    return accion instanceof Audio && typeof accion.archivo === 'string';
+  }
+  eliminarAccion(accionAEliminar: Accion) {
+    if (!this.selectedCell) return;
+
+    const acciones = this.tableroGrid[this.selectedCell.fila][this.selectedCell.columna].acciones;
+    const index = acciones.findIndex(acc => acc.id === accionAEliminar.id);
+    if (index !== -1) {
+      acciones.splice(index, 1);
+    }
+  }
+  async reproducirAudio(base64: string | null | File) {
+    if (base64 === null) {
+      console.log("No hay audio.");
+      return;
+    } else if (typeof base64 === 'string') {
+      const audio = new window.Audio(base64);
+      audio.play();
+    } else if (base64 instanceof File) {
+      const audio = new window.Audio(URL.createObjectURL(base64));
+      audio.play();
+    }
   }
   seleccionarCelda(fila: number, columna: number) {
     this.selectedCell = { fila, columna };

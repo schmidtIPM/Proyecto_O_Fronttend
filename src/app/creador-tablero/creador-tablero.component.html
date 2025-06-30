@@ -120,6 +120,11 @@
           <li *ngFor="let accion of tableroGrid[selectedCell.fila][selectedCell.columna].acciones"
           [ngClass]="'accion-' + accion.constructor.name">
             {{ getDescripcionAccion(accion) }}
+
+              <ng-container *ngIf="esAudio(accion)">
+                <button (click)="reproducirAudio(accion.archivo)">🔊</button>
+              </ng-container>
+              <button (click)="eliminarAccion(accion)" style="float: right;">X</button>
           </li>
         </ul>
       </div>

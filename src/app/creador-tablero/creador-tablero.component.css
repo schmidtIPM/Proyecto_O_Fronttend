@@ -153,7 +153,7 @@ td {
 }
 .panel-lateral {
   position: fixed;
-  top: -10px;
+  top: 86px;
   right: 0;
   height: auto;
   min-height: 100vh;

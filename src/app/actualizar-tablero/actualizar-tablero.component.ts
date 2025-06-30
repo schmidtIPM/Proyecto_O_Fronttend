@@ -4,6 +4,8 @@ import { ConectionBackService } from '../conection-back.service';
 import { Tablero, Tag, Accion, Audio, Movimiento, Luz } from '../models';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
+import { MiniPaintComponent } from '../mini-paint/mini-paint.component';
 
 @Component({
   selector: 'app-actualizar-tablero',
@@ -22,10 +24,17 @@ export class ActualizarTableroComponent implements OnInit {
   panelStyles: any = {};
   nuevaAccion: Accion | null = null;
   idAccion = 0;
+  tagGrid: { fondo: string | File, fila: number; columna: number }[] = []
+  mostrarZoom = false;
+  colorLineasTablero: string = "FFFFFF";
+  fondoTablero: string | File = "FFFFFF"
+  colores: string[] = ['#1479e4', '#A7D129', '#FF7F50'];
+  showPopup = false;
+
   constructor(
     private route: ActivatedRoute,
     private conectionBack: ConectionBackService,
-    private router: Router
+    private router: Router, private dialog: MatDialog
   ) {}
   ngOnInit(): void {
     const id: string | null = this.route.snapshot.paramMap.get('id');
@@ -153,9 +162,6 @@ export class ActualizarTableroComponent implements OnInit {
       }
     });
   }
-  cerrarPanel() {
-    this.selectedCell = null;
-  }
   async reproducirAudio(base64: string | null | File) {
     if (base64 === null) {
       console.log("No hay audio.");
@@ -163,7 +169,41 @@ export class ActualizarTableroComponent implements OnInit {
     } else if (typeof base64 === 'string') {
       const audio = new window.Audio(base64);
       audio.play();
+    }else if (base64 instanceof File) {
+      const audio = new window.Audio(URL.createObjectURL(base64));
+      audio.play();
     }
+  }
+  onArchivoImagenChange(event: any) {
+    console.log(event);
+    let file;
+    if (event instanceof File) {
+     file = event;
+    }
+    else {
+      file = event.target.files[0];
+    }
+    if (!this.selectedCell){
+      this.fondoTablero = file;
+      event.target.value=null;
+      return;
+    }
+    for (var tag of this.tagGrid) {
+      if(this.selectedCell?.fila == tag.fila && this.selectedCell.columna == tag.columna){
+        if (file) {
+          tag.fondo = file;
+        }
+        return;
+      }
+    }
+    if (this.selectedCell && file) {
+      this.tagGrid.push({
+        fondo: file,
+        fila: this.selectedCell.fila,
+        columna: this.selectedCell.columna
+      });
+    }
+    event.target.value=null;
   }
   esAudio(accion: Accion): accion is Audio {
     return accion instanceof Audio && typeof accion.archivo === 'string';
@@ -197,13 +237,13 @@ export class ActualizarTableroComponent implements OnInit {
     return 'Acción desconocida';
   }
   guardarTablero() {
-    this.prepararArchivosDesdeBase64(this.tablero);
     const tags: Tag[] = [];
     let tagId = 0;
     for (let filaIndex = 0; filaIndex < this.tableroGrid.length; filaIndex++) {
       for (let columnaIndex = 0; columnaIndex < this.tableroGrid[filaIndex].length; columnaIndex++) {
         const celda = this.tableroGrid[filaIndex][columnaIndex];
-        tags.push(new Tag(tagId++, celda.acciones, filaIndex, columnaIndex));
+        const tagFondo = this.tagGrid.find(t => t.fila === filaIndex && t.columna === columnaIndex);
+        tags.push(new Tag(tagId++, celda.acciones, filaIndex, columnaIndex, tagFondo?.fondo));
       }
     } 
     const tablero = new Tablero(
@@ -213,6 +253,8 @@ export class ActualizarTableroComponent implements OnInit {
       this.tablero.columnas,
       tags[0],
       tags,
+      this.colorLineasTablero,
+      this.fondoTablero
     );
     this.conectionBack.modificarTablero(tablero, this.tablero.id)
       .then(respuesta => {
@@ -224,28 +266,16 @@ export class ActualizarTableroComponent implements OnInit {
         alert('Hubo un error al guardar el tablero.');
       });
   }
-  base64ToFile(base64: string, filename: string, mime: string = 'audio/mpeg'): File {
-    const byteString = atob(base64.split(',')[1]);
-    const ab = new ArrayBuffer(byteString.length);
-    const ia = new Uint8Array(ab);
-    for (let i = 0; i < byteString.length; i++) {
-      ia[i] = byteString.charCodeAt(i);
-    }
-    const blob = new Blob([ab], { type: mime });
-    return new File([blob], filename, { type: mime });
+  cerrarPanel() {
+    this.selectedCell = null;
   }
-  prepararArchivosDesdeBase64(tablero: Tablero): void {
-    const tags = [tablero.mainTag, ...tablero.listaTags];
-    for (const tag of tags) {
-      tag.listaAcciones = tag.listaAcciones.map(accion => {
-        if (accion.tipo === 'audio' && typeof (accion as any).archivo === 'string' && (accion as any).archivo.startsWith('data:')) {
-          console.log("Archivo MP3 encontrado:", (accion as any).archivo);
-          const nombre = `audio.mp3`;
-          (accion as any).archivo = this.base64ToFile((accion as any).archivo, nombre);
-        }
-        return accion;
-      });
-    }
+  paint() {
+    const dialogRef = this.dialog.open(MiniPaintComponent, {
+      width: '520px',
+      height: '500px'
+    });
+    dialogRef.afterClosed().subscribe(result => {
+      this.onArchivoImagenChange(result)
+    });
   }
-
 }
