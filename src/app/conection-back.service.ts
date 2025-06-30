@@ -19,7 +19,6 @@ export class ConectionBackService {
     const appendFondoIfFile = (fondo: string | File | undefined, key: string) => {
       if (fondo instanceof File) {formData.append(key, fondo);}
     };
-    appendFondoIfFile(data.fondo, 'tablero-fondo');
     appendFondoIfFile(data.mainTag.fondo, 'mainTag-fondo');
     data.listaTags.forEach((tag, tagIndex) => {
       appendFondoIfFile(tag.fondo, `tag-${tagIndex}-fondo`);

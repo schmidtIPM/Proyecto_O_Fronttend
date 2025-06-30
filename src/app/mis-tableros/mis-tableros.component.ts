@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { ConectionBackService } from '../conection-back.service';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
+import { Tablero } from '../models';
 
 @Component({
   selector: 'app-mis-tableros',
@@ -22,7 +23,23 @@ export class MisTablerosComponent {
   ngOnInit() {
     this.cargarTableros();
   }
+  getFondoTablero(tablero: Tablero) {
+    const fondo = tablero.fondo;
 
+    if (!fondo) return {};
+    if (typeof fondo === 'string' && /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(fondo)) {
+      return {
+        'background-color': fondo
+      };
+    }
+    console.log(tablero.colorlineas);
+    const url = typeof fondo === 'string' ? fondo : URL.createObjectURL(fondo);
+    return {
+      'background-image': `url(${url})`,
+      'background-size': 'cover',
+      'background-position': 'center'
+    };
+  }
   async cargarTableros() {
     try {
       const response = await this.conectionBack.getTablero();

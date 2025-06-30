@@ -55,6 +55,7 @@ export class Tablero {
     public mainTag: Tag,
     public listaTags: Tag[],
     public colorlineas?: string,
-    public fondo?: string | File
+    public fondo?: string | File,
+    public tamanioCelda?: number
   ) {}
 }

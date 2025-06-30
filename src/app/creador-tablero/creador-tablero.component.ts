@@ -32,6 +32,7 @@ export class CreadorTableroComponent {
   fondoTablero: string | File = "FFFFFF"
   colores: string[] = ['#1479e4', '#A7D129', '#FF7F50'];
   showPopup = false;
+  tamanioCelda = 10;
 
   
   constructor(private conectionBack: ConectionBackService, private dialog: MatDialog) {}
@@ -124,7 +125,6 @@ export class CreadorTableroComponent {
       this.nuevaAccion = null;
     }
   }
-
   onArchivoImagenChange(event: any) {
     console.log(event);
     let file;
@@ -156,7 +156,6 @@ export class CreadorTableroComponent {
     }
     event.target.value=null;
   }
-
   onArchivoAudioChange(event: any) {
     const file = event.target.files[0];
     if (file && this.nuevaAccion instanceof Audio) {
@@ -215,7 +214,8 @@ export class CreadorTableroComponent {
       tags[0],
       tags,
       this.colorLineasTablero,
-      this.fondoTablero
+      this.fondoTablero,
+      this.tamanioCelda
     );
     this.conectionBack.guardarTablero(tablero)
       .then(respuesta => {
@@ -258,7 +258,6 @@ export class CreadorTableroComponent {
     }
     return 'Acción desconocida';
   }
-
   getEstiloCelda(fila: number, columna: number): any {
     const tag = this.tagGrid.find(t => t.fila === fila && t.columna === columna);
     if (tag && tag.fondo) {
@@ -301,7 +300,6 @@ export class CreadorTableroComponent {
   }
   getFondoTablero() {
     const fondo = this.fondoTablero;
-
     if (!fondo) return {};
     if (typeof fondo === 'string' && /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(fondo)) {
       return {
@@ -315,16 +313,13 @@ export class CreadorTableroComponent {
       'background-position': 'center'
     };
   }
-
   paint() {
     const dialogRef = this.dialog.open(MiniPaintComponent, {
       width: '520px',
       height: '500px'
     });
-
-     dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().subscribe(result => {
       this.onArchivoImagenChange(result)
-     });
+    });
   }
-
 }

@@ -39,7 +39,6 @@ export class ActualizarTableroComponent implements OnInit {
   ngOnInit(): void {
     const id: string | null = this.route.snapshot.paramMap.get('id');
     if (!id) return;
-
     this.conectionBack.getTableroPorId(id).then(tablero => {
       if (!tablero) {
         alert('Tablero no encontrado');
@@ -61,8 +60,7 @@ export class ActualizarTableroComponent implements OnInit {
     const file = event.target.files[0];
     if (file && this.nuevaAccion instanceof Audio) {
       this.nuevaAccion.archivo = file;
-    }
-    
+    } 
     if (this.selectedCell && this.nuevaAccion) {
       if (this.nuevaAccion instanceof Audio) {
         console.log("Archivo MP3 cargado:", this.nuevaAccion.archivo);
@@ -71,6 +69,23 @@ export class ActualizarTableroComponent implements OnInit {
     }
     this.nuevaAccion = null;
   }
+  getFondoTablero() {
+    const fondo = this.tablero.fondo;
+
+    if (!fondo) return {};
+    if (typeof fondo === 'string' && /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(fondo)) {
+      return {
+        'background-color': fondo
+      };
+    }
+    const url = typeof fondo === 'string' ? fondo : URL.createObjectURL(fondo);
+    return {
+      'background-image': `url(${url})`,
+      'background-size': 'cover',
+      'background-position': 'center'
+    };
+  }
+  
   setLuz(color : string, intervalo: number){
     if (this.selectedCell && this.nuevaAccion) {
       if (this.nuevaAccion instanceof Luz) {

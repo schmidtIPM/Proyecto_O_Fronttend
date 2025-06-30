@@ -39,4 +39,5 @@ export interface ITablero {
   _id?: string;
   fondo?: string;
   colorlineas: string | File;
+  tamanioCelda?: number;
 }
