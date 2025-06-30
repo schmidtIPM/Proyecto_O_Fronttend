@@ -28,7 +28,7 @@ export class CreadorTableroComponent {
   selectedCell: { fila: number; columna: number } | null = null;
   panelStyles = {};
   nuevaAccion: Accion | null = null;
-  colorLineasTablero: string = "FFFFFF";
+  colorLineasTablero: string = "A7D129";
   fondoTablero: string | File = "FFFFFF"
   colores: string[] = ['#1479e4', '#A7D129', '#FF7F50'];
   showPopup = false;
@@ -44,6 +44,7 @@ export class CreadorTableroComponent {
     this.selectedCell = null;
     this.verificarTamanioCeldas();
     this.tableroGenerado = true;
+    console.log(this.colorLineasTablero);
   }
   esAudio(accion: Accion): accion is Audio {
     return accion instanceof Audio && typeof accion.archivo === 'string';
@@ -257,46 +258,41 @@ export class CreadorTableroComponent {
       return `𝗟𝘂𝘇: Color ${accion.color.toUpperCase()}, Intervalo ${accion.intervalo} ms`;
     }
     return 'Acción desconocida';
+  }  
+  isFilePath(fondo: string): boolean {
+    return /\.(png|jpg|jpeg|gif|webp)$/i.test(fondo);
   }
   getEstiloCelda(fila: number, columna: number): any {
     const tag = this.tagGrid.find(t => t.fila === fila && t.columna === columna);
     if (tag && tag.fondo) {
-      const url = typeof tag.fondo === 'string' ? tag.fondo : URL.createObjectURL(tag.fondo);
-      return {
-        'background-image': `url(${url})`,
-        'background-size': 'cover',
-        'background-position': 'center'
-      };
-    }
-    const acciones = this.tableroGrid[fila][columna].acciones;
-    const coloresAccion: string[] = [];
-    for (const accion of acciones) {
-      const tipo = accion.constructor.name;
-      if (tipo === 'Audio2') {
-        coloresAccion.push(this.colores[0]);
-      } else if (tipo === 'Movimiento') {
-        coloresAccion.push(this.colores[1]);
-      } else if (tipo === 'Luz') {
-        const colorLuz = this.colores[2];
-        coloresAccion.push(colorLuz);
+      if(tag.fondo instanceof File){
+        const url = typeof tag.fondo === 'string' ? tag.fondo : URL.createObjectURL(tag.fondo);
+        return {
+          'background-image': `url(${url})`,
+          'background-size': 'cover',
+          'background-position': 'center',
+          'border-color': this.colorLineasTablero
+        };
+      }else if(this.isFilePath(tag.fondo)){
+        return {
+          'background-image': `url(${tag.fondo})`,
+          'background-size': 'cover',
+          'background-position': 'center',
+          'border-color': this.colorLineasTablero
+        };
+      }else{
+        return {
+          'background-color': `${tag.fondo}`,
+          'background-size': 'cover',
+          'background-position': 'center',
+          'border-color': this.colorLineasTablero
+        };
       }
     }
-    if (coloresAccion.length === 0) {
-      return {};
-    }
-    if (coloresAccion.length === 1) {
-      return { 'background-color': coloresAccion[0] };
-    }
-    const n = coloresAccion.length;
-    let gradiente = 'linear-gradient(to bottom, ';
-    coloresAccion.forEach((color, index) => {
-      const inicio = (index / n) * 100;
-      const final = ((index + 1) / n) * 100;
-      gradiente += `${color} ${inicio}%, ${color} ${final}%`;
-      if (index !== n - 1) gradiente += ', ';
-    });
-    gradiente += ')';
-    return { background: gradiente };
+    return {
+      'background': 'transparent',
+      'border-color': this.colorLineasTablero
+    };
   }
   getFondoTablero() {
     const fondo = this.fondoTablero;

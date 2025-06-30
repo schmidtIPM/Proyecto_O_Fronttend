@@ -1,13 +1,9 @@
 <div class="p-4">
-  <div *ngIf="tablero">
-    <h2>Tablero: {{ tablero.nombre }}</h2>
-  </div>
-
   <p *ngIf="cargando">Cargando tablero...</p>
 
   <div *ngIf="!cargando && tableroGrid.length" class="contenedor-tablero-panel">
     <div class="tablero-container">
-      <div style="margin-bottom: 1rem;">
+      <div style="margin-bottom: 1rem;" *ngIf="mostrarZoom">
         Zoom:
         <button (click)="zoomIn()">+</button>
         <button (click)="zoomOut()">−</button>
@@ -17,7 +13,8 @@
         <div class="tablero-zoom" [ngStyle]="{ transform: 'scale(' + zoomLevel + ')' }">
           <table [ngStyle]="getFondoTablero()">
             <tr *ngFor="let fila of tableroGrid; let i = index">
-              <td *ngFor="let celda of fila; let j = index" (click)="seleccionarCelda(i, j)" >
+              <td *ngFor="let celda of fila; let j = index" (click)="seleccionarCelda(i, j)" 
+                 [ngStyle]="getEstiloCelda(i, j)">
                 <div class="celda"style="background: transparent;">
                   <div>
                     <p id="masTablero">({{ i }}, {{ j }})</p>
@@ -31,8 +28,17 @@
         <button (click)="guardarTablero()">Guardar Tablero</button>
       </div>
     </div>
-        <div class="panel-lateral">
-      <h2>Tablero: {{ tablero.nombre }}</h2>
+    <div class="panel-lateral">
+      <div style="display: flex; flex-direction: column;">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <h2>Tablero: </h2>
+          <input type="text" value="{{ tablero.nombre }}" [(ngModel)]="tablero.nombre">
+        </div>
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <p><strong>Tamaño de celdas</strong>(cm)</p>
+          <input type="number" value="{{ tablero.tamanioCelda }}" [(ngModel)]="tablero.tamanioCelda">
+        </div>
+      </div>
       <!-- BOTON FONDO Y COLOR DE LINEA -->
       <div *ngIf="!selectedCell" class="panel-lateral-sin-celda">
         <label for="inputFondo" class="boton-browse">Agregar fondo</label>

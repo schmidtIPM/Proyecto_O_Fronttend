@@ -2,7 +2,7 @@
 <div class="cards-container">
   <div class="card" *ngFor="let tablero of tableros">
     <div class="card-preview" [ngStyle]="getFondoTablero(tablero)">
-      <div class="celda" *ngFor="let celda of celdasVacias" [ngStyle]="{ 'border-color': '#' + tablero.colorlineas }"></div>
+      <div class="celda" *ngFor="let celda of celdasVacias" [ngStyle]="{ 'border-color': tablero.colorlineas }"></div>
     </div>
     <div class="card-body">
       <h3>{{ tablero.nombre }}</h3>

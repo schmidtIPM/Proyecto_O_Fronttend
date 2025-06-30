@@ -2,19 +2,25 @@
   <div *ngIf="!tableroGenerado" class="crear-tablero">
     <h2>Crear Tablero</h2>
     <label>
-      Nombre:
+      <p>Nombre:</p>
       <input [(ngModel)]="nombreTablero" />
     </label>
     <div class="fila-columnas">
-      Filas:
+      <p>Filas:</p>
       <input type="number" [(ngModel)]="filas" min="1" />
-      Columnas:
+      <p>Columnas:</p>
       <input type="number" [(ngModel)]="columnas" min="1" />
     </div>
     <label>
-      <div class="distancia-celdas">
-        Distancia entre celdas (cm):
+      <div class="distancia-celdas"  style="display: flex; align-items: center;">
+        <p>Tamaño de celdas (cm):</p>
         <input type="number" value="10" [(ngModel)]="tamanioCelda"/>
+      </div>
+    </label>
+    <label>
+      <div style="display: flex; align-items: center;">
+        <p style="margin-right: 1em;">Color de las lineas:</p>
+        <input type="color" [(ngModel)]="colorLineasTablero">
       </div>
     </label>
     <button (click)="generarTablero()" style="font-weight: bold; font-size: larger;">Generar</button>
@@ -32,8 +38,8 @@
           <table [ngStyle]="getFondoTablero()">
             <tr *ngFor="let fila of tableroGrid; let i = index">
               <td *ngFor="let celda of fila; let j = index"
-                (click)="seleccionarCelda(i, j)">
-                <div class="celda" [ngStyle]="getEstiloCelda(i, j)" style="background: transparent;">
+                (click)="seleccionarCelda(i, j)" [ngStyle]="getEstiloCelda(i, j)">
+                <div class="celda" style="background: transparent;">
                   <div>
                     <p id="masTablero">+</p>
                   </div>

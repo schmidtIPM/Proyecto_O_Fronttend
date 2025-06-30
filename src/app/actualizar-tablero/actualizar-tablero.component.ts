@@ -6,6 +6,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { MiniPaintComponent } from '../mini-paint/mini-paint.component';
+import { LargeNumberLike } from 'node:crypto';
 
 @Component({
   selector: 'app-actualizar-tablero',
@@ -26,8 +27,6 @@ export class ActualizarTableroComponent implements OnInit {
   idAccion = 0;
   tagGrid: { fondo: string | File, fila: number; columna: number }[] = []
   mostrarZoom = false;
-  colorLineasTablero: string = "FFFFFF";
-  fondoTablero: string | File = "FFFFFF"
   colores: string[] = ['#1479e4', '#A7D129', '#FF7F50'];
   showPopup = false;
 
@@ -85,7 +84,6 @@ export class ActualizarTableroComponent implements OnInit {
       'background-position': 'center'
     };
   }
-  
   setLuz(color : string, intervalo: number){
     if (this.selectedCell && this.nuevaAccion) {
       if (this.nuevaAccion instanceof Luz) {
@@ -199,24 +197,19 @@ export class ActualizarTableroComponent implements OnInit {
       file = event.target.files[0];
     }
     if (!this.selectedCell){
-      this.fondoTablero = file;
+      this.tablero.fondo = file;
       event.target.value=null;
       return;
     }
-    for (var tag of this.tagGrid) {
+    let listTags: Tag[] = this.tablero.listaTags;
+    listTags.push(this.tablero.mainTag);
+    for (var tag of listTags) {
       if(this.selectedCell?.fila == tag.fila && this.selectedCell.columna == tag.columna){
         if (file) {
           tag.fondo = file;
         }
         return;
       }
-    }
-    if (this.selectedCell && file) {
-      this.tagGrid.push({
-        fondo: file,
-        fila: this.selectedCell.fila,
-        columna: this.selectedCell.columna
-      });
     }
     event.target.value=null;
   }
@@ -225,6 +218,50 @@ export class ActualizarTableroComponent implements OnInit {
   }
   zoomIn() {
     this.zoomLevel = Math.min(100, this.zoomLevel + 0.1);
+  }
+  isFilePath(fondo: string): boolean {
+    return /\.(png|jpg|jpeg|gif|webp)$/i.test(fondo);
+  }
+  getEstiloCelda(fila: number, columna: number): any {
+    let tag: Tag | null = null;
+    let listTags: Tag[] = this.tablero.listaTags;
+    listTags.push(this.tablero.mainTag);
+    for (var tagAux of listTags) {
+      if(fila == tagAux.fila && columna == tagAux.columna){
+        tag = tagAux;
+        break;
+      }
+    }
+    if(tag == null){return;}
+    if (tag && tag.fondo) {
+      if(tag.fondo instanceof File){
+        const url = typeof tag.fondo === 'string' ? tag.fondo : URL.createObjectURL(tag.fondo);
+        return {
+          'background-image': `url(${url})`,
+          'background-size': 'cover',
+          'background-position': 'center',
+          'border-color': this.tablero.colorlineas
+        };
+      }else if(this.isFilePath(tag.fondo)){
+        return {
+          'background-image': `url(${tag.fondo})`,
+          'background-size': 'cover',
+          'background-position': 'center',
+          'border-color': this.tablero.colorlineas
+        };
+      }else{
+        return {
+          'background-color': `${tag.fondo}`,
+          'background-size': 'cover',
+          'background-position': 'center',
+          'border-color': this.tablero.colorlineas
+        };
+      }
+    }
+    return {
+      'background': 'transparent',
+      'border-color': this.tablero.colorlineas
+    };
   }
   zoomOut() {
     this.zoomLevel = Math.max(-100, this.zoomLevel - 0.1);
@@ -268,8 +305,9 @@ export class ActualizarTableroComponent implements OnInit {
       this.tablero.columnas,
       tags[0],
       tags,
-      this.colorLineasTablero,
-      this.fondoTablero
+      this.tablero.colorlineas,
+      this.tablero.fondo,
+      this.tablero.tamanioCelda
     );
     this.conectionBack.modificarTablero(tablero, this.tablero.id)
       .then(respuesta => {
