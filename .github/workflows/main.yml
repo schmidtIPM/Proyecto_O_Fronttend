@@ -7,6 +7,7 @@ on:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+    environment: proyecto_o_front
 
     permissions:
       contents: read
@@ -26,6 +27,11 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Reemplazar URL del backend
+        run: |
+          sed -i -e 's|URLsed|${{ vars.url }}|g' src/app/connection.service.ts
+ 
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
