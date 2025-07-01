@@ -30,7 +30,7 @@ jobs:
 
       - name: Reemplazar URL del backend
         run: |
-          sed -i -e 's|URLsed|${{ vars.url }}|g' src/app/connection.service.ts
+          sed -i -e 's|URLsed|${{ vars.url }}|g' src/app/conection-back.service.ts
  
 
       - name: Extract metadata (tags, labels) for Docker
