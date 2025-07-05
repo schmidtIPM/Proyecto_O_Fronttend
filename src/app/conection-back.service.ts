@@ -19,6 +19,7 @@ export class ConectionBackService {
     const appendFondoIfFile = (fondo: string | File | undefined, key: string) => {
       if (fondo instanceof File) {formData.append(key, fondo);}
     };
+    appendFondoIfFile(data.fondo, 'tablero-fondo');
     appendFondoIfFile(data.mainTag.fondo, 'mainTag-fondo');
     data.listaTags.forEach((tag, tagIndex) => {
       appendFondoIfFile(tag.fondo, `tag-${tagIndex}-fondo`);
@@ -79,36 +80,50 @@ export class ConectionBackService {
     try {
       const response = await axios.get(`${this.baseUrl}/tablero`);
       const tableros = response.data;
-      console.log(tableros);
       return this.procesarRutas(tableros);
     } catch (error) {
       console.error('Error al obtener tableros', error);
       return [];
     }
   }
+  async updateFav(idTablero: string, ponerFavorito: boolean): Promise<any> {
+    try {
+      const response = await axios.post(`${this.baseUrl}/tablero/actualizarFav/${idTablero}/${ponerFavorito}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error al actualizar el tablero', error);
+      throw error;
+    }
+  }
   procesarRutas(tableros: Tablero[]): Tablero[] {
     return tableros.map(tablero => {
-      if (tablero.fondo && typeof tablero.fondo === 'string' && this.isFilePath(tablero.fondo)){
-        tablero.fondo = this.baseUrl + tablero.fondo;
-        console.log(tablero.fondo);
-      } 
+      if (tablero.fondo && typeof tablero.fondo === 'string' && this.isFilePath(tablero.fondo)) {
+        tablero.fondo = this.baseUrl + encodeURI(tablero.fondo);
+      }
+
       const procesarTag = (tag: Tag) => {
-        if (tag.fondo && typeof tag.fondo === 'string' && this.isFilePath(tag.fondo)){
-          tag.fondo = this.baseUrl + tag.fondo;
-          console.log(tag.fondo);
-        } 
+        if (tag.fondo && typeof tag.fondo === 'string' && this.isFilePath(tag.fondo)) {
+          tag.fondo = this.baseUrl + encodeURI(tag.fondo);
+        }
+
         tag.listaAcciones = tag.listaAcciones.map(accion => {
-          if (accion.tipo === 'audio' && typeof (accion as Audio).archivo === 'string') {
-            (accion as Audio).archivo = this.baseUrl + (accion as Audio).archivo;
-            console.log((accion as Audio).archivo);
+          if (
+            accion.tipo === 'audio' &&
+            typeof (accion as Audio).archivo === 'string' &&
+            (accion as Audio).archivo !== null
+          ) {
+            (accion as Audio).archivo = this.baseUrl + encodeURI((accion as Audio).archivo as string);
           }
           return accion;
         });
+
         return tag;
       };
+
       tablero.mainTag = procesarTag(tablero.mainTag);
       tablero.listaTags = tablero.listaTags.map(procesarTag);
       return tablero;
     });
   }
+
 }

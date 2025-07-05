@@ -37,7 +37,9 @@ export interface ITablero {
   mainTag: ITag;
   listaTags: ITag[];
   _id?: string;
-  fondo?: string;
+  fondo: string;
   colorlineas: string | File;
-  tamanioCelda?: number;
+  tamanioCelda: number;
+  favoritos: boolean;
+  predeterminado: boolean;
 }

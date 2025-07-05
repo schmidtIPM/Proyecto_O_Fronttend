@@ -14,7 +14,7 @@ import { Tablero } from '../models';
 export class MisTablerosComponent {
   constructor(
     private conectionBack: ConectionBackService,
-    private router: Router 
+    private router: Router,
   ) {}
 
   tableros: any[] = [];
@@ -32,10 +32,9 @@ export class MisTablerosComponent {
         'background-color': fondo
       };
     }
-    console.log(tablero.colorlineas);
     const url = typeof fondo === 'string' ? fondo : URL.createObjectURL(fondo);
     return {
-      'background-image': `url(${url})`,
+      'background-image': `url('${this.safeEncodeUrl(url)}')`,
       'background-size': 'cover',
       'background-position': 'center'
     };
@@ -43,7 +42,12 @@ export class MisTablerosComponent {
   async cargarTableros() {
     try {
       const response = await this.conectionBack.getTablero();
+      if (!response || response.length === 0) {
+        this.tableros = [];
+        return;
+      }
       this.tableros = response;
+      console.log('Tableros cargados:', this.tableros);
     } catch (error) {
       console.error('Error al cargar los tableros:', error);
     }
@@ -69,7 +73,24 @@ export class MisTablerosComponent {
   }
 
   irASimularTablero(id: string) {
-  this.router.navigate(['/tablero', id]);
-}
-
+    this.router.navigate(['/tablero', id]);
+  }
+  safeEncodeUrl(url: string): string {
+    // Si ya contiene % seguido de 2 hex, asumimos que está codificada
+    return /%[0-9A-Fa-f]{2}/.test(url) ? url : encodeURI(url);
+  }
+  actualizarFavorito(tablero: Tablero) {
+    if (!tablero._id) {
+      console.error('El tablero no tiene un _id definido.');
+      return;
+    }
+    this.conectionBack.updateFav(tablero._id, !tablero.favoritos)
+      .then(response => {
+        tablero.favoritos = !tablero.favoritos;
+        console.log('Tablero actualizado:', response);
+      })
+      .catch(error => {
+        console.error('Error al actualizar el tablero:', error);
+      });
+  }
 }

@@ -54,8 +54,11 @@ export class Tablero {
     public columnas: number,
     public mainTag: Tag,
     public listaTags: Tag[],
+    public _id?: string, 
     public colorlineas?: string,
     public fondo?: string | File,
-    public tamanioCelda?: number
+    public tamanioCelda?: number,
+    public favoritos: boolean = false,
+    public predeterminado: boolean = false,
   ) {}
 }
