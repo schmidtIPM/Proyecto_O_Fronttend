@@ -93,4 +93,27 @@ export class MisTablerosComponent {
         console.error('Error al actualizar el tablero:', error);
       });
   }
+
+  readonly CARD_WIDTH_PX = 300;
+  currentIndex = 0;
+
+  getVisibleCount(): number {
+    return Math.min(5, this.tableros.length);
+  }
+
+  siguiente() {
+    const maxIndex = this.tableros.length - this.getVisibleCount();
+    if (this.currentIndex < maxIndex) {
+      this.currentIndex++;
+    }
+  }
+
+  anterior() {
+   if (this.currentIndex > 0) {
+      this.currentIndex--;
+    }
+  }
+
+  
+
 }

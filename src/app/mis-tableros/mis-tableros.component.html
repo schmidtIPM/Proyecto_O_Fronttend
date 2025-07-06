@@ -1,11 +1,12 @@
+<div class="carousel-viewport-multiple">
+  <div class="carousel-track-multiple"
+       [style.transform]="'translateX(-' + currentIndex * CARD_WIDTH_PX + 'px)'"
+       [style.width.px]="tableros.length * CARD_WIDTH_PX">
 
-<div class="cards-container">
-  <div *ngIf="tableros.length > 0">
-    <div class="card"  *ngFor="let tablero of tableros">
+    <div class="card" *ngFor="let tablero of tableros">
       <div class="card-preview" [ngStyle]="getFondoTablero(tablero)">
         <div class="celda" *ngFor="let celda of celdasVacias" [ngStyle]="{ 'border-color': tablero.colorlineas }"></div>
       </div>
-
       <div class="card-body">
         <h3>{{ tablero.nombre }}</h3>
         <button class="btn-eliminar" (click)="eliminarTablero(tablero.id)">Eliminar</button>
@@ -15,7 +16,7 @@
       </div>
     </div>
   </div>
-  <div *ngIf="!tableros.length" style="margin-top: 2rem;">
-    <p>No hay tableros disponibles.</p>
-  </div>
+
+  <button class="carousel-button prev" *ngIf="tableros.length > getVisibleCount()" (click)="anterior()">←</button>
+  <button class="carousel-button next" *ngIf="tableros.length > getVisibleCount()" (click)="siguiente()">→</button>
 </div>

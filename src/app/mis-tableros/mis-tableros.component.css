@@ -94,4 +94,64 @@
   background-color: #e07148;
 }
 
+.btn-favorito {
+  background-color: #FF7F50;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 4px;
+  margin-left: 0.5rem;
+  transition: background-color 0.3s;
+  margin-top: 5px;
+}
 
+.btn-favorito:hover {
+  background-color: #e07148;
+}
+
+.carousel-viewport-multiple {
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+  max-width: 1500px;
+  margin: 60px auto 0 auto;
+}
+
+.carousel-track-multiple {
+  display: flex;
+  gap: 20px;
+  transition: transform 0.5s ease;
+  justify-content: flex-start;
+}
+
+.card {
+  width: 280px;
+  flex-shrink: 0;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+
+.carousel-button {
+  position: absolute;
+  top: 40%;
+  transform: translateY(-50%);
+  background-color: #FF7F50;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  padding: 0.5rem;
+  cursor: pointer;
+  z-index: 10;
+  border-radius: 10px;
+}
+
+.carousel-button.prev {
+  left: 0;
+}
+
+.carousel-button.next {
+  right: 0;
+}
