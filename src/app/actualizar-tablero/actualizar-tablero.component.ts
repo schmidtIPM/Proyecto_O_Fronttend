@@ -298,6 +298,9 @@ export class ActualizarTableroComponent implements OnInit {
         tags.push(new Tag(tagId++, celda.acciones, filaIndex, columnaIndex, tagFondo?.fondo));
       }
     } 
+    const fondoFinal = this.tablero.fondo instanceof File
+      ? URL.createObjectURL(this.tablero.fondo)
+      : this.tablero.fondo;
     const tablero = new Tablero(
       Date.now(),
       this.tablero.nombre,
@@ -305,8 +308,9 @@ export class ActualizarTableroComponent implements OnInit {
       this.tablero.columnas,
       tags[0],
       tags,
+      this.tablero._id, // esto no estaba antes 
       this.tablero.colorlineas,
-      this.tablero.fondo,
+      fondoFinal,
       this.tablero.tamanioCelda
     );
     this.conectionBack.modificarTablero(tablero, this.tablero.id)

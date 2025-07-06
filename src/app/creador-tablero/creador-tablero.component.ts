@@ -207,6 +207,9 @@ export class CreadorTableroComponent {
         tags.push(new Tag(tagId++, celda.acciones, filaIndex, columnaIndex, tagFondo?.fondo));
       }
     }
+    const fondoFinal = this.fondoTablero instanceof File
+      ? URL.createObjectURL(this.fondoTablero)
+      : this.fondoTablero;
     const tablero = new Tablero(
       Date.now(),
       this.nombreTablero,
@@ -214,8 +217,9 @@ export class CreadorTableroComponent {
       this.columnas,
       tags[0],
       tags,
+      undefined, //esto no estaba antes 
       this.colorLineasTablero,
-      this.fondoTablero,
+      fondoFinal,
       this.tamanioCelda
     );
     this.conectionBack.guardarTablero(tablero)
