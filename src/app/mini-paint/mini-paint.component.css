@@ -1,11 +1,94 @@
 canvas {
   border: 1px solid black;
-  width: 500px;
-  height: 400px;
+  max-width: 70%;
+  max-height: auto;
+  width: 25rem;
+  height: 25rem;
 }
+
+.botones-dibujo {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
 
 .dialog-actions {
   display: flex;
-  justify-content: flex-end; /* o center / space-between / flex-start */
+  margin-right: 7.5rem;
+  justify-content: flex-end;
   padding-top: 1rem;
+}
+
+.botones button {
+  display: inline-block;
+  background-color: #1479e4;
+  color: white;
+  padding: 1.5vw 1.5vw;
+  border-radius: 0.3rem;
+  cursor: pointer;
+  text-align: center;
+  border: 0;
+  font-size: medium;
+}
+
+.botones {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem;
+}
+
+.elementos-visuales {
+  display: flex;
+  justify-content: center;
+}
+
+.selector-color {
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background-color: #ffffff;
+  display: inline-block;
+}
+
+@media (max-width: 700px){
+  canvas {
+    border: 1px solid black;
+    width: 15rem;
+    height: 15rem;
+  }
+  .botones button {
+  display: inline-block;
+  background-color: #1479e4;
+  color: white;
+  padding: 2vw 2vw;
+  border-radius: 0.3rem;
+  cursor: pointer;
+  text-align: center;
+  border: 0;
+  font-size: medium;
+  }
+  .botones-dibujo {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+  }
+  .elementos-visuales{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+}
+
+@media (max-width: 500px){
+  canvas {
+    border: 1px solid black;
+    width: 10rem;
+    height: 10rem;
+  }
 }

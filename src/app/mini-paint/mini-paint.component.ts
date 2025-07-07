@@ -26,13 +26,12 @@ export class MiniPaintComponent implements AfterViewInit {
   ultimoColor = '';
   private ctx!: CanvasRenderingContext2D | null;
   private drawing = false;
-
-  
+  grosorLapiz: number = 5;
 
   ngAfterViewInit() {
     const canvas = this.canvasRef.nativeElement;
     this.ctx = canvas.getContext('2d');
-    canvas.width = 500;
+    canvas.width = 400;
     canvas.height = 400;
   }
 
@@ -53,7 +52,7 @@ export class MiniPaintComponent implements AfterViewInit {
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;
 
-    this.ctx.lineWidth = 2;
+    this.ctx.lineWidth = this.grosorLapiz;
     this.ctx.lineCap = 'round';
     this.ctx.strokeStyle = this.colorActual;
 
@@ -70,6 +69,14 @@ export class MiniPaintComponent implements AfterViewInit {
 
   usarLapiz() {
     this.colorActual = this.ultimoColor; 
+  }
+
+  rellenarCanvas() {
+    const canvas = this.canvasRef.nativeElement;
+    if (this.ctx || this.ctx) {
+      this.ctx.fillStyle = this.colorActual;
+      this.ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
   }
 
   /* guardarComoImagen() {
@@ -94,4 +101,6 @@ export class MiniPaintComponent implements AfterViewInit {
       }
     }, 'image/png');
   }
+
+  
 }

@@ -1,13 +1,27 @@
-<h2 mat-dialog-title>Mini Paint</h2>
-<mat-dialog-content>
-    <input type="color" [(ngModel)]="colorActual" />
-    <button (click)="usarBorrador()">Borrador</button>
-    <button (click)="usarLapiz()">Lápiz</button>
+<!-- <h2 mat-dialog-title>Mini Paint</h2> -->
+<mat-dialog-content class="elementos-visuales">
+  <div class="botones">
+    <input type="color" class="selector-color" [(ngModel)]="colorActual" />
+    <label for="slider">Tamaño:</label>
+    <input
+      id="slider"
+      type="range"
+      min="1"
+      max="50"
+      [(ngModel)]="grosorLapiz"
+      class="slider-tamanio"
+    />
+    <div class="botones-dibujo">
+      <button (click)="usarLapiz()">✏️</button>
+      <button (click)="usarBorrador()">🧽</button>
+      <button (click)="rellenarCanvas()">🪣</button>
+    </div>
+  </div>
     <canvas #canvas
-        (mousedown)="startDrawing($event)"
-        (mouseup)="endDrawing()"
-        (mouseleave)="endDrawing()"
-        (mousemove)="draw($event)">
+      (mousedown)="startDrawing($event)"
+      (mouseup)="endDrawing()"
+      (mouseleave)="endDrawing()"
+      (mousemove)="draw($event)">
     </canvas>
 </mat-dialog-content>
 <mat-dialog-actions class="dialog-actions">

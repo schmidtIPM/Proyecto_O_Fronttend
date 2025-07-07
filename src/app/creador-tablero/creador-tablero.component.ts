@@ -207,9 +207,6 @@ export class CreadorTableroComponent {
         tags.push(new Tag(tagId++, celda.acciones, filaIndex, columnaIndex, tagFondo?.fondo));
       }
     }
-    const fondoFinal = this.fondoTablero instanceof File
-      ? URL.createObjectURL(this.fondoTablero)
-      : this.fondoTablero;
     const tablero = new Tablero(
       Date.now(),
       this.nombreTablero,
@@ -217,9 +214,9 @@ export class CreadorTableroComponent {
       this.columnas,
       tags[0],
       tags,
-      undefined, //esto no estaba antes 
+      undefined,
       this.colorLineasTablero,
-      fondoFinal,
+      this.fondoTablero,
       this.tamanioCelda
     );
     this.conectionBack.guardarTablero(tablero)
@@ -315,8 +312,10 @@ export class CreadorTableroComponent {
   }
   paint() {
     const dialogRef = this.dialog.open(MiniPaintComponent, {
-      width: '520px',
-      height: '500px'
+      maxWidth: '90vw',
+      maxHeight: '90vh',
+      width: '42rem',
+      height: '32rem'
     });
     dialogRef.afterClosed().subscribe(result => {
       this.onArchivoImagenChange(result)
