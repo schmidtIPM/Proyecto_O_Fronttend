@@ -1,3 +1,13 @@
+
+.categoriaTableros {
+  margin-left: 10%;
+  color: #000000;
+  font-weight: bold;
+  font-size: 1.5rem;
+  margin-top: 40px;
+  margin-bottom: 20px;
+}
+
 .cards-container {
   display: flex;
   flex-wrap: wrap;
@@ -111,12 +121,15 @@
   background-color: #e07148;
 }
 
-.carousel-viewport-multiple {
-  overflow: hidden;
+.carousel-container {
   position: relative;
-  width: 100%;
   max-width: 1500px;
   margin: 60px auto 0 auto;
+}
+
+.carousel-viewport-multiple {
+  overflow: hidden;
+  width: 100%;
 }
 
 .carousel-track-multiple {
@@ -126,18 +139,9 @@
   justify-content: flex-start;
 }
 
-.card {
-  width: 280px;
-  flex-shrink: 0;
-  padding: 10px;
-  box-sizing: border-box;
-}
-
-
 .carousel-button {
   position: absolute;
   top: 40%;
-  transform: translateY(-50%);
   background-color: #FF7F50;
   border: none;
   color: white;
@@ -149,9 +153,10 @@
 }
 
 .carousel-button.prev {
-  left: 0;
+  left: -20px;
 }
 
 .carousel-button.next {
-  right: 0;
+  right: -20px;
 }
+

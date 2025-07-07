@@ -1,18 +1,22 @@
-<div class="carousel-viewport-multiple">
-  <div class="carousel-track-multiple"
-       [style.transform]="'translateX(-' + currentIndex * CARD_WIDTH_PX + 'px)'"
-       [style.width.px]="tableros.length * CARD_WIDTH_PX">
+<h2 class="categoriaTableros">Mis Tableros</h2>
+<div class="carousel-container">
+  <div class="carousel-viewport-multiple">
+    <div class="carousel-track-multiple"
+         [style.transform]="'translateX(-' + currentIndex * CARD_WIDTH_PX + 'px)'"
+         [style.width.px]="tableros.length * CARD_WIDTH_PX">
 
-    <div class="card" *ngFor="let tablero of tableros">
-      <div class="card-preview" [ngStyle]="getFondoTablero(tablero)">
-        <div class="celda" *ngFor="let celda of celdasVacias" [ngStyle]="{ 'border-color': tablero.colorlineas }"></div>
-      </div>
-      <div class="card-body">
-        <h3>{{ tablero.nombre }}</h3>
-        <button class="btn-eliminar" (click)="eliminarTablero(tablero.id)">Eliminar</button>
-        <button class="btn-editar" (click)="irAEditarTablero(tablero._id)">Editar</button>
-        <button class="btn-simulador" (click)="irASimularTablero(tablero._id)">Simular</button>
-        <button class="btn-favorito" (click)="actualizarFavorito(tablero)">Favorito</button>
+      <div class="card" *ngFor="let tablero of tableros">
+        <div class="card-preview" [ngStyle]="getFondoTablero(tablero)">
+          <div class="celda" *ngFor="let celda of celdasVacias"
+               [ngStyle]="{ 'border-color': tablero.colorlineas }"></div>
+        </div>
+        <div class="card-body">
+          <h3>{{ tablero.nombre }}</h3>
+          <button class="btn-eliminar" (click)="eliminarTablero(tablero.id)">Eliminar</button>
+          <button class="btn-editar" (click)="irAEditarTablero(tablero._id)">Editar</button>
+          <button class="btn-simulador" (click)="irASimularTablero(tablero._id)">Simular</button>
+          <button class="btn-favorito" (click)="actualizarFavorito(tablero)">Favorito</button>
+        </div>
       </div>
     </div>
   </div>
@@ -20,3 +24,35 @@
   <button class="carousel-button prev" *ngIf="tableros.length > getVisibleCount()" (click)="anterior()">←</button>
   <button class="carousel-button next" *ngIf="tableros.length > getVisibleCount()" (click)="siguiente()">→</button>
 </div>
+
+<h2 class="categoriaTableros">Tableros Favoritos</h2>
+ <p *ngIf="tablerosFavoritos.length === 0" style="color: #000000; text-align: center; margin-top: 40px;">
+  No hay tableros en favoritos
+</p>
+<div class="carousel-container">
+  <div class="carousel-viewport-multiple">
+    <div class="carousel-track-multiple"
+         [style.transform]="'translateX(-' + favoritosIndex * CARD_WIDTH_PX + 'px)'"
+         [style.width.px]="tablerosFavoritos.length * CARD_WIDTH_PX">
+
+      <div class="card" *ngFor="let tablero of tablerosFavoritos">
+        <div class="card-preview" [ngStyle]="getFondoTablero(tablero)">
+          <div class="celda" *ngFor="let celda of celdasVacias"
+               [ngStyle]="{ 'border-color': tablero.colorlineas }"></div>
+        </div>
+        <div class="card-body">
+          <h3>{{ tablero.nombre }}</h3>
+          <button class="btn-eliminar" (click)="eliminarTablero(tablero.id)">Eliminar</button>
+          <button class="btn-editar" (click)="irAEditarTablero(tablero._id)">Editar</button>
+          <button class="btn-simulador" (click)="irASimularTablero(tablero._id)">Simular</button>
+          <button class="btn-favorito" (click)="actualizarFavorito(tablero)">Favorito</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <button class="carousel-button prev" *ngIf="tablerosFavoritos.length > getVisibleCount()" (click)="anteriorFavoritos()">←</button>
+  <button class="carousel-button next" *ngIf="tablerosFavoritos.length > getVisibleCount()" (click)="siguienteFavoritos()">→</button>
+</div>
+
+

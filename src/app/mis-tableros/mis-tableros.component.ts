@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { ConectionBackService } from '../conection-back.service';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
-import { Tablero } from '../models';
+import { Tablero,} from '../models';
 
 @Component({
   selector: 'app-mis-tableros',
@@ -27,18 +27,24 @@ export class MisTablerosComponent {
     const fondo = tablero.fondo;
 
     if (!fondo) return {};
+
     if (typeof fondo === 'string' && /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(fondo)) {
       return {
         'background-color': fondo
       };
     }
-    const url = typeof fondo === 'string' ? fondo : URL.createObjectURL(fondo);
+
+    const url = typeof fondo === 'string'
+      ? (fondo.startsWith('http') ? fondo : this.safeEncodeUrl(fondo))
+      : URL.createObjectURL(fondo);
+
     return {
-      'background-image': `url('${this.safeEncodeUrl(url)}')`,
+      'background-image': `url('${url}')`,
       'background-size': 'cover',
       'background-position': 'center'
     };
-  }
+}
+
   async cargarTableros() {
     try {
       const response = await this.conectionBack.getTablero();
@@ -101,6 +107,9 @@ export class MisTablerosComponent {
     return Math.min(5, this.tableros.length);
   }
 
+  
+
+
   siguiente() {
     const maxIndex = this.tableros.length - this.getVisibleCount();
     if (this.currentIndex < maxIndex) {
@@ -114,6 +123,25 @@ export class MisTablerosComponent {
     }
   }
 
-  
+  favoritosIndex = 0;
+
+  get tablerosFavoritos(): any[] {
+    return this.tableros.filter(t => t.favoritos);
+  }
+
+  anteriorFavoritos() {
+    if (this.favoritosIndex > 0) {
+      this.favoritosIndex--;
+    }
+  }
+
+  siguienteFavoritos() {
+    const maxIndex = this.tablerosFavoritos.length - this.getVisibleCount();
+    if (this.favoritosIndex < maxIndex) {
+      this.favoritosIndex++;
+    }
+  }
+
+ 
 
 }
