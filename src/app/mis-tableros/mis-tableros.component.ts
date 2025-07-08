@@ -101,7 +101,7 @@ export class MisTablerosComponent {
   if (width <= 768) return 2;
   if (width <= 992) return 3;
   if (width <= 1200) return 4;
-  return 5;
+  return 4;
 }
 
   siguiente() {
