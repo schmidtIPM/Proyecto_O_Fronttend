@@ -13,6 +13,7 @@ import { FormsModule } from '@angular/forms';
   styleUrl: './simulador-tablero.component.css'
 })
 export class SimuladorTableroComponent {
+  mostrarZoom = false;
   tablero!: Tablero;
   tableroGrid: { acciones: Accion[] }[][] = [];
   cargando = true;
@@ -22,7 +23,7 @@ export class SimuladorTableroComponent {
   panelStyles: any = {};
   nuevaAccion: Accion | null = null;
   idAccion = 0;
-  robotPos: { fila: number; columna: number; direccion: string } = { fila: 0, columna: 0, direccion: "arriba" };
+  robotPos: { fila: number; columna: number; direccion: string } = { fila: 0, columna: 0, direccion: "abajo" };
   anteriorPobotPos: { fila: number; columna: number } = { fila: 0, columna: 0 };
   movimientosAcomulados: string[] = [];
 
@@ -136,6 +137,15 @@ export class SimuladorTableroComponent {
   moverRobot(direccion: 'arriba' | 'abajo' | 'izquierda' | 'derecha') {
     this.movimientosAcomulados.push(direccion);
   }
+  verificarTamanioCeldas() {
+    setTimeout(() => {
+      const unaCelda = document.querySelector('.celda') as HTMLElement;
+      if (unaCelda) {
+        const { width, height } = unaCelda.getBoundingClientRect();
+        this.mostrarZoom = this.tablero.columnas > 6 || this.tablero.filas > 5;
+      }
+    }, 0);
+  }
   ngOnInit(): void {
     const id: string | null = this.route.snapshot.paramMap.get('id');
     if (!id) return;
@@ -160,10 +170,12 @@ export class SimuladorTableroComponent {
     return this.nuevaAccion instanceof Luz ? this.nuevaAccion as Luz : null;
   }
   procesarTablero(tablero: Tablero) {
-    const grid: { acciones: Accion[] }[][] = Array.from({ length: tablero.filas }, () =>
+    this.verificarTamanioCeldas();
+    const filaEspecial = [ { acciones: [] } ];
+    const filasNormales = Array.from({ length: tablero.filas }, () =>
       Array.from({ length: tablero.columnas }, () => ({ acciones: [] }))
     );
-
+    const grid: { acciones: Accion[] }[][] = [filaEspecial, ...filasNormales];
     for (const tag of tablero.listaTags) {
       const acciones: Accion[] = tag.listaAcciones.map(acc => {
         switch (acc.tipo) {
@@ -184,9 +196,13 @@ export class SimuladorTableroComponent {
             return acc;
         }
       });
-      grid[tag.fila][tag.columna].acciones = acciones;
+      const fila = tag.fila === 0 ? 0 : tag.fila;
+      const columna = tag.columna;
+      const filaReal = (fila === 0 && columna === 0) ? 0 : fila + 1;
+      if (grid[filaReal] && grid[filaReal][columna]) {
+        grid[filaReal][columna].acciones = acciones;
+      }
     }
-
     this.tableroGrid = grid;
   }
   seleccionarCelda(fila: number, columna: number) {

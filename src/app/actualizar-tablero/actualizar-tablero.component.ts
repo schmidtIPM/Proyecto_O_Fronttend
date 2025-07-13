@@ -127,10 +127,12 @@ export class ActualizarTableroComponent implements OnInit {
     }
   }
   procesarTablero(tablero: Tablero) {
-    const grid: { acciones: Accion[] }[][] = Array.from({ length: tablero.filas }, () =>
+    this.verificarTamanioCeldas();
+    const filaEspecial = [ { acciones: [] } ];
+    const filasNormales = Array.from({ length: tablero.filas }, () =>
       Array.from({ length: tablero.columnas }, () => ({ acciones: [] }))
     );
-
+    const grid: { acciones: Accion[] }[][] = [filaEspecial, ...filasNormales];
     for (const tag of tablero.listaTags) {
       const acciones: Accion[] = tag.listaAcciones.map(acc => {
         switch (acc.tipo) {
@@ -151,9 +153,13 @@ export class ActualizarTableroComponent implements OnInit {
             return acc;
         }
       });
-      grid[tag.fila][tag.columna].acciones = acciones;
+      const fila = tag.fila === 0 ? 0 : tag.fila;
+      const columna = tag.columna;
+      const filaReal = (fila === 0 && columna === 0) ? 0 : fila + 1;
+      if (grid[filaReal] && grid[filaReal][columna]) {
+        grid[filaReal][columna].acciones = acciones;
+      }
     }
-
     this.tableroGrid = grid;
   }
   seleccionarCelda(fila: number, columna: number) {
@@ -268,6 +274,15 @@ export class ActualizarTableroComponent implements OnInit {
   }
   zoomReset() {
     this.zoomLevel = 1;
+  }
+  verificarTamanioCeldas() {
+    setTimeout(() => {
+      const unaCelda = document.querySelector('.celda') as HTMLElement;
+      if (unaCelda) {
+        const { width, height } = unaCelda.getBoundingClientRect();
+        this.mostrarZoom = this.tablero.columnas > 6 || this.tablero.filas > 5;
+      }
+    }, 0);
   }
   eliminarAccion(accionAEliminar: Accion) {
     if (!this.selectedCell) return;

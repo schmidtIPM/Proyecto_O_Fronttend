@@ -12,6 +12,8 @@ import { Tablero } from '../models';
   styleUrl: './mis-tableros.component.css'
 })
 export class MisTablerosComponent {
+  estrella: string = "";
+  estrellaAmarilla: string = "";
   constructor(
     private conectionBack: ConectionBackService,
     private router: Router,
@@ -19,12 +21,17 @@ export class MisTablerosComponent {
   tableros: any[] = [];
   celdasVacias = Array(9); 
 
- ngOnInit() {
-  this.cargarTableros();
-  window.addEventListener('resize', () => {
-    this.getVisibleCount(); 
-  });
-}
+ async ngOnInit() {
+    this.cargarTableros();
+    window.addEventListener('resize', () => {
+      this.getVisibleCount(); 
+    });
+    const response = await this.conectionBack.getImagenesPagina();
+    if (response && response.length > 0) {
+      this.estrellaAmarilla = response.find((file: string) => file.includes('estrellaAmarilla.png')) || '';
+      this.estrella = response.find((file: string) => file.includes('estrella.png')) || '';
+    }
+  }
 
   getFondoTablero(tablero: Tablero) {
     const fondo = tablero.fondo;

@@ -1,70 +1,77 @@
-<div class="p-4">
-  <div *ngIf="!tableroGenerado" class="crear-tablero">
-    <h2>Crear Tablero</h2>
-    <label>
-      <p>Nombre:</p>
-      <input [(ngModel)]="nombreTablero" />
-    </label>
-    <div class="fila-columnas">
-      <p>Filas:</p>
-      <input type="number" [(ngModel)]="filas" min="1" />
-      <p>Columnas:</p>
-      <input type="number" [(ngModel)]="columnas" min="1" />
+
+<div *ngIf="!tableroGenerado" class="crear-tablero">
+  <h1>Crear Tablero</h1>
+  <label>
+    <p>Nombre:</p>
+    <input [(ngModel)]="nombreTablero" id="inputCrearTablero" />
+  </label>
+  <div class="fila-columnas">
+    <p>Filas:</p>
+    <input type="number" [(ngModel)]="filas" min="1" />
+    <p>Columnas:</p>
+    <input type="number" [(ngModel)]="columnas" min="1" />
+  </div>
+  <label>
+    <div class="distancia-celdas"  style="display: flex; align-items: center;">
+      <p>Tamaño de celdas (cm):</p>
+      <input type="number" value="10" [(ngModel)]="tamanioCelda"/>
     </div>
-    <label>
-      <div class="distancia-celdas"  style="display: flex; align-items: center;">
-        <p>Tamaño de celdas (cm):</p>
-        <input type="number" value="10" [(ngModel)]="tamanioCelda"/>
-      </div>
-    </label>
-    <label>
-      <div style="display: flex; align-items: center;">
-        <p style="margin-right: 1em;">Color de las lineas:</p>
-        <input type="color" [(ngModel)]="colorLineasTablero">
-      </div>
-    </label>
+  </label>
+  <label>
+    <div style="display: flex; align-items: center;">
+      <p style="margin-right: 1em;">Color de las lineas:</p>
+      <input type="color" [(ngModel)]="colorLineasTablero">
+    </div>
+  </label>
+  <div style="width: 100%; display: flex; justify-content: center;">
     <button (click)="generarTablero()" style="font-weight: bold; font-size: larger;">Generar</button>
   </div>
-  <div *ngIf="tableroGrid.length" class="contenedor-tablero-panel">
-    <div class="tablero-container">
-      <div *ngIf="mostrarZoom" style="margin-bottom: 1rem;">
-        Zoom:
-        <button (click)="zoomIn()">+</button>
-        <button (click)="zoomOut()">−</button>
-        <button *ngIf="zoomLevel != 1" (click)="zoomReset()">Reset</button>
-      </div>
-      <div class="tablero-wrapper">
-        <div class="tablero-zoom" [ngStyle]="{ transform: 'scale(' + zoomLevel + ')' }">
-          <table [ngStyle]="getFondoTablero()">
-            <tr *ngFor="let fila of tableroGrid; let i = index">
+</div>
+<div *ngIf="tableroGrid.length" class="contenedor-tablero-panel">
+  <div class="tablero-container">
+    <div *ngIf="mostrarZoom" style="margin-bottom: 1rem;">
+      Zoom:
+      <button (click)="zoomIn()">+</button>
+      <button (click)="zoomOut()">−</button>
+      <button *ngIf="zoomLevel != 1" (click)="zoomReset()">Reset</button>
+    </div>
+    <div class="tablero-wrapper">
+      <div class="tablero-zoom" [ngStyle]="{ transform: 'scale(' + zoomLevel + ')' }" >
+        <table [ngStyle]="getFondoTablero()">
+          <tr *ngFor="let fila of tableroGrid; let i = index">
+            <ng-container *ngIf="i === 0; else filaNormal">
+              <td (click)="seleccionarCelda(0, 0)" [ngStyle]="getEstiloCelda(0, 0)">
+                <div class="celda" style="background: transparent;">
+                  <div><p id="masTablero">+</p></div>
+                </div>
+              </td>
+            </ng-container>
+            <ng-template #filaNormal>
               <td *ngFor="let celda of fila; let j = index"
                 (click)="seleccionarCelda(i, j)" [ngStyle]="getEstiloCelda(i, j)">
                 <div class="celda" style="background: transparent;">
-                  <div>
-                    <p id="masTablero">+</p>
-                  </div>
+                  <div><p id="masTablero">+</p></div>
                 </div>
               </td>
-            </tr>
-          </table>
-        </div>
+            </ng-template>
+          </tr>
+        </table>
       </div>
-      <button (click)="guardarTablero()">Guardar Tablero</button>
     </div>
-
-    <div class="panel-lateral">
-      <h2>Tablero: {{ nombreTablero }}</h2>
-      <!-- BOTON FONDO Y COLOR DE LINEA -->
-      <div *ngIf="!selectedCell" class="panel-lateral-sin-celda">
-        <label for="inputFondo" class="boton-browse">Agregar fondo</label>
-        <input id="inputFondo" type="file" accept=".png" (change)="onArchivoImagenChange($event)" style="display: none;">
-        <button mat-raised-button color="primary" class="boton-paint" (click)="paint()">Abrir Paint</button>
-
-        <h2>Panel de acciones</h2>
-        <p>Selecciona una celda del tablero para ver o editar sus acciones.</p>
-      </div>
-      <div *ngIf="selectedCell">
-        <div class="panel-header">
+    <button (click)="guardarTablero()">Guardar Tablero</button>
+  </div>
+  <div class="panel-lateral">
+    <h2>Tablero: {{ nombreTablero }}</h2>
+    <!-- BOTON FONDO Y COLOR DE LINEA -->
+    <div *ngIf="!selectedCell" class="panel-lateral-sin-celda">
+      <label for="inputFondo" class="boton-browse">Agregar fondo</label>
+      <input id="inputFondo" type="file" accept=".png" (change)="onArchivoImagenChange($event)" style="display: none;">
+      <button mat-raised-button color="primary" class="boton-browse" (click)="paint()">Abrir Paint</button>
+      <h2>Panel de acciones</h2>
+      <p>Selecciona una celda del tablero para ver o editar sus acciones.</p>
+    </div>
+    <div *ngIf="selectedCell">
+      <div class="panel-header">
         <div style="display: flex; justify-content: space-between; width: 100%;">
           <h3>Celda: ({{ selectedCell.fila }}, {{ selectedCell.columna }})</h3>
           <button class="cerrar" (click)="cerrarPanel()">✕</button>
@@ -73,8 +80,7 @@
       </div>
       <label for="inputFondo" class="boton-browse">Agregar fondo</label>
       <input id="inputFondo" type="file" accept=".png" (change)="onArchivoImagenChange($event)" style="display: none;">
-      
-      <button mat-raised-button color="primary" class="boton-paint" (click)="paint()">Abrir Paint</button>
+      <button mat-raised-button color="primary" class="boton-browse" (click)="paint()">Abrir Paint</button>
       <div class="agregar">
         <p><strong>Agregar acción:</strong></p>
         <div class="botones">
@@ -121,17 +127,16 @@
         <p><strong>Acciones actuales:</strong></p>
         <ul>
           <li *ngFor="let accion of tableroGrid[selectedCell.fila][selectedCell.columna].acciones"
-          [ngClass]="'accion-' + accion.constructor.name">
+          [ngClass]="'accion-' + accion.constructor.name" style="margin-bottom: 2px;">
             {{ getDescripcionAccion(accion) }}
 
               <ng-container *ngIf="esAudio(accion)">
                 <button (click)="reproducirAudio(accion.archivo)">🔊</button>
               </ng-container>
-              <button (click)="eliminarAccion(accion)" style="float: right;">X</button>
+              <button class="cerrar" (click)="eliminarAccion(accion)" style="float: right; font-size: 0.89em;">✕</button>
           </li>
         </ul>
       </div>
     </div>
-  </div>
   </div>
 </div>

@@ -36,15 +36,25 @@ export class CreadorTableroComponent {
 
   
   constructor(private conectionBack: ConectionBackService, private dialog: MatDialog) {}
+  tamanioCeldaPx = 50;
+  @ViewChild('tableroZoom', { static: false }) tableroZoom!: ElementRef;
 
   generarTablero() {
-    this.tableroGrid = Array.from({ length: this.filas }, () =>
+    const filaEspecial = [ { acciones: [] } ];
+    const filasNormales = Array.from({ length: this.filas }, () =>
       Array.from({ length: this.columnas }, () => ({ acciones: [] }))
     );
+    this.tableroGrid = [filaEspecial, ...filasNormales];
     this.selectedCell = null;
     this.verificarTamanioCeldas();
     this.tableroGenerado = true;
-    console.log(this.colorLineasTablero);
+    setTimeout(() => {
+      const celda = this.tableroZoom?.nativeElement.querySelector('.celda');
+      if (celda) {
+        this.tamanioCeldaPx = celda.offsetHeight;
+        console.log('Tamaño celda:', this.tamanioCeldaPx);
+      }
+    }, 0);
   }
   esAudio(accion: Accion): accion is Audio {
     return accion instanceof Audio && typeof accion.archivo === 'string';
@@ -200,7 +210,10 @@ export class CreadorTableroComponent {
   guardarTablero() {
     const tags: Tag[] = [];
     let tagId = 0;
-    for (let filaIndex = 0; filaIndex < this.tableroGrid.length; filaIndex++) {
+    const celdaMain = this.tableroGrid[0][0];
+    const tagFondoMain = this.tagGrid.find(t => t.fila === 0 && t.columna === 0);
+    const mainTag = new Tag(tagId++, celdaMain.acciones, 0, 0, tagFondoMain?.fondo);
+    for (let filaIndex = 1; filaIndex < this.tableroGrid.length; filaIndex++) {
       for (let columnaIndex = 0; columnaIndex < this.tableroGrid[filaIndex].length; columnaIndex++) {
         const celda = this.tableroGrid[filaIndex][columnaIndex];
         const tagFondo = this.tagGrid.find(t => t.fila === filaIndex && t.columna === columnaIndex);
@@ -212,7 +225,7 @@ export class CreadorTableroComponent {
       this.nombreTablero,
       this.filas,
       this.columnas,
-      tags[0],
+      mainTag,
       tags,
       undefined,
       this.colorLineasTablero,
@@ -305,9 +318,10 @@ export class CreadorTableroComponent {
     }
     const url = typeof fondo === 'string' ? fondo : URL.createObjectURL(fondo);
     return {
-      'background-image': `url(${url})`,
+      'background-image': `url(${this.fondoTablero})`,
       'background-size': 'cover',
-      'background-position': 'center'
+      'background-repeat': 'no-repeat',
+      'background-position': `center ${this.tamanioCeldaPx}px`
     };
   }
   paint() {

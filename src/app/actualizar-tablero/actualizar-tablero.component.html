@@ -43,7 +43,7 @@
       <div *ngIf="!selectedCell" class="panel-lateral-sin-celda">
         <label for="inputFondo" class="boton-browse">Agregar fondo</label>
         <input id="inputFondo" type="file" accept=".png" (change)="onArchivoImagenChange($event)" style="display: none;">
-        <button mat-raised-button color="primary" class="boton-paint" (click)="paint()">Abrir Paint</button>
+        <button mat-raised-button color="primary" class="boton-browse" (click)="paint()">Abrir Paint</button>
 
         <h2>Panel de acciones</h2>
         <p>Selecciona una celda del tablero para ver o editar sus acciones.</p>
@@ -59,7 +59,7 @@
       <label for="inputFondo" class="boton-browse">Agregar fondo</label>
       <input id="inputFondo" type="file" accept=".png" (change)="onArchivoImagenChange($event)" style="display: none;">
       
-      <button mat-raised-button color="primary" class="boton-paint" (click)="paint()">Abrir Paint</button>
+      <button mat-raised-button color="primary" class="boton-browse" (click)="paint()">Abrir Paint</button>
       <div class="agregar">
         <p><strong>Agregar acción:</strong></p>
         <div class="botones">
@@ -112,7 +112,7 @@
               <ng-container *ngIf="esAudio(accion)">
                 <button (click)="reproducirAudio(accion.archivo)">🔊</button>
               </ng-container>
-              <button (click)="eliminarAccion(accion)" style="float: right;">X</button>
+              <button class="cerrar" (click)="eliminarAccion(accion)" style="float: right; font-size: 0.89em;">✕</button>
           </li>
         </ul>
       </div>

@@ -95,6 +95,21 @@ export class ConectionBackService {
       throw error;
     }
   }
+  async getImagenesPagina(): Promise<string[]> {
+    if (isPlatformBrowser(this.platformId)) {
+      try {
+        const response = await axios.get(`${this.baseUrl}/static/imgPag`);
+        for (let i = 0; i < response.data.length; i++) {
+          response.data[i] = this.baseUrl + '/static/imgPag/' + encodeURIComponent(response.data[i]);
+        }
+        return response.data;
+      } catch (error) {
+        console.error('Error al obtener imágenes de la página', error);
+        return [];
+      }
+    }
+    return [];
+  }
   procesarRutas(tableros: Tablero[]): Tablero[] {
     return tableros.map(tablero => {
       if (tablero.fondo && typeof tablero.fondo === 'string' && this.isFilePath(tablero.fondo)) {
