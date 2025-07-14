@@ -6,6 +6,7 @@ import { ConectionBackService } from '../conection-back.service';
 import { ElementRef, ViewChild, AfterViewInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MiniPaintComponent } from '../mini-paint/mini-paint.component';
+import { ActivatedRoute, Route, Router } from '@angular/router';
 
 @Component({
   standalone: true,
@@ -20,7 +21,8 @@ export class CreadorTableroComponent {
   columnas = 3;
   nombreTablero = 'Nuevo Tablero';
   tableroGrid: { acciones: Accion[] }[][] = [];
-  tagGrid: { fondo: string | File, fila: number; columna: number }[] = []
+  mainTagAccions: Accion[] = [];
+  tagGrid: { fondo: string | File, fila: number; columna: number }[] = [];
   accionesDisponibles: string[] = ['audio', 'movimiento', 'luz'];
   idAccion = 0;
   zoomLevel = 1;
@@ -29,43 +31,41 @@ export class CreadorTableroComponent {
   panelStyles = {};
   nuevaAccion: Accion | null = null;
   colorLineasTablero: string = "A7D129";
-  fondoTablero: string | File = "FFFFFF"
+  fondoTablero: string | File = "FFFFFF";
   colores: string[] = ['#1479e4', '#A7D129', '#FF7F50'];
   showPopup = false;
   tamanioCelda = 10;
 
   
-  constructor(private conectionBack: ConectionBackService, private dialog: MatDialog) {}
-  tamanioCeldaPx = 50;
-  @ViewChild('tableroZoom', { static: false }) tableroZoom!: ElementRef;
+  constructor(private conectionBack: ConectionBackService, private dialog: MatDialog, private router: Router) {}
 
   generarTablero() {
-    const filaEspecial = [ { acciones: [] } ];
-    const filasNormales = Array.from({ length: this.filas }, () =>
+    this.tableroGrid = Array.from({ length: this.filas }, () =>
       Array.from({ length: this.columnas }, () => ({ acciones: [] }))
     );
-    this.tableroGrid = [filaEspecial, ...filasNormales];
     this.selectedCell = null;
     this.verificarTamanioCeldas();
     this.tableroGenerado = true;
-    setTimeout(() => {
-      const celda = this.tableroZoom?.nativeElement.querySelector('.celda');
-      if (celda) {
-        this.tamanioCeldaPx = celda.offsetHeight;
-        console.log('Tamaño celda:', this.tamanioCeldaPx);
-      }
-    }, 0);
   }
   esAudio(accion: Accion): accion is Audio {
     return accion instanceof Audio && typeof accion.archivo === 'string';
   }
-  eliminarAccion(accionAEliminar: Accion) {
-    if (!this.selectedCell) return;
-
-    const acciones = this.tableroGrid[this.selectedCell.fila][this.selectedCell.columna].acciones;
-    const index = acciones.findIndex(acc => acc.id === accionAEliminar.id);
-    if (index !== -1) {
-      acciones.splice(index, 1);
+  eliminarAccion(accionAEliminar: Accion, mainTag: boolean) {
+    if(mainTag){
+      const acciones = this.mainTagAccions;
+      const index = acciones.findIndex(acc => acc.id === accionAEliminar.id);
+      if (index !== -1) {
+        acciones.splice(index, 1);
+      }
+      this.mainTagAccions = acciones;
+    }else{
+      if (!this.selectedCell) return;
+      const acciones = this.tableroGrid[this.selectedCell.fila][this.selectedCell.columna].acciones;
+      const index = acciones.findIndex(acc => acc.id === accionAEliminar.id);
+      if (index !== -1) {
+        acciones.splice(index, 1);
+      }
+      this.tableroGrid[this.selectedCell.fila][this.selectedCell.columna].acciones = acciones;
     }
   }
   async reproducirAudio(base64: string | null | File) {
@@ -130,12 +130,6 @@ export class CreadorTableroComponent {
         this.nuevaAccion = null;
     }
   }
-  confirmarAccion(fila: number, columna: number) {
-    if (this.nuevaAccion) {
-      this.tableroGrid[fila][columna].acciones.push(this.nuevaAccion);
-      this.nuevaAccion = null;
-    }
-  }
   onArchivoImagenChange(event: any) {
     console.log(event);
     let file;
@@ -167,16 +161,17 @@ export class CreadorTableroComponent {
     }
     event.target.value=null;
   }
-  onArchivoAudioChange(event: any) {
+  onArchivoAudioChange(event: any, mainTag: boolean) {
     const file = event.target.files[0];
     if (file && this.nuevaAccion instanceof Audio) {
       this.nuevaAccion.archivo = file;
     }
-    if (this.selectedCell && this.nuevaAccion) {
-      if (this.nuevaAccion instanceof Audio) {
-        console.log("Archivo MP3 cargado:", this.nuevaAccion.archivo);
+    if (mainTag && this.nuevaAccion){
+      this.mainTagAccions.push(this.nuevaAccion);
+    } else{
+      if (this.selectedCell && this.nuevaAccion) {
+        this.tableroGrid[this.selectedCell.fila][this.selectedCell.columna].acciones.push(this.nuevaAccion);
       }
-      this.tableroGrid[this.selectedCell.fila][this.selectedCell.columna].acciones.push(this.nuevaAccion);
     }
     this.nuevaAccion = null;
   }
@@ -186,21 +181,28 @@ export class CreadorTableroComponent {
     }
     return '';
   }
-  setLuz(color : string, intervalo: number){
-    if (this.selectedCell && this.nuevaAccion) {
-      if (this.nuevaAccion instanceof Luz) {
-        console.log("Luz cargada:", this.nuevaAccion.color);
+  setLuz(mainTag: boolean){
+    if(mainTag){
+      if (this.nuevaAccion) {
+        this.mainTagAccions.push(this.nuevaAccion);
       }
-      this.tableroGrid[this.selectedCell.fila][this.selectedCell.columna].acciones.push(this.nuevaAccion);
+    }else{
+      if (this.selectedCell && this.nuevaAccion) {
+        this.tableroGrid[this.selectedCell.fila][this.selectedCell.columna].acciones.push(this.nuevaAccion);
+      }
     }
     this.nuevaAccion = null;
   }
-  setDireccionMovimiento(direccion: 'arriba' | 'abajo' | 'izquierda' | 'derecha') {
+  setDireccionMovimiento(direccion: 'arriba' | 'abajo' | 'izquierda' | 'derecha', mainTag: boolean) {
     if (this.nuevaAccion instanceof Movimiento) {
       this.nuevaAccion.direccion = direccion;
     }
-    if (this.selectedCell && this.nuevaAccion) {
-      this.tableroGrid[this.selectedCell.fila][this.selectedCell.columna].acciones.push(this.nuevaAccion);
+    if(mainTag && this.nuevaAccion){
+      this.mainTagAccions.push(this.nuevaAccion);
+    }else{
+      if (this.selectedCell && this.nuevaAccion) {
+        this.tableroGrid[this.selectedCell.fila][this.selectedCell.columna].acciones.push(this.nuevaAccion);
+      }
     }
     this.nuevaAccion = null;
   }
@@ -209,17 +211,15 @@ export class CreadorTableroComponent {
   }
   guardarTablero() {
     const tags: Tag[] = [];
-    let tagId = 0;
-    const celdaMain = this.tableroGrid[0][0];
-    const tagFondoMain = this.tagGrid.find(t => t.fila === 0 && t.columna === 0);
-    const mainTag = new Tag(tagId++, celdaMain.acciones, 0, 0, tagFondoMain?.fondo);
-    for (let filaIndex = 1; filaIndex < this.tableroGrid.length; filaIndex++) {
+    for (let filaIndex = 0; filaIndex < this.tableroGrid.length; filaIndex++) {
       for (let columnaIndex = 0; columnaIndex < this.tableroGrid[filaIndex].length; columnaIndex++) {
         const celda = this.tableroGrid[filaIndex][columnaIndex];
         const tagFondo = this.tagGrid.find(t => t.fila === filaIndex && t.columna === columnaIndex);
-        tags.push(new Tag(tagId++, celda.acciones, filaIndex, columnaIndex, tagFondo?.fondo));
+        tags.push(new Tag(Math.floor(Math.random() * (564 - 0 + 1)) +5465, celda.acciones, filaIndex, columnaIndex, tagFondo?.fondo));
       }
     }
+    let mainTag: Tag = new Tag(Math.floor(Math.random() * (564 - 0 + 1)) +5465, 
+        this.mainTagAccions, -1, -1, "FFFFFF");
     const tablero = new Tablero(
       Date.now(),
       this.nombreTablero,
@@ -236,6 +236,9 @@ export class CreadorTableroComponent {
       .then(respuesta => {
         console.log('Tablero guardado correctamente:', respuesta);
         alert('Tablero guardado con éxito');
+        this.router.navigate(['/']).then(() => {
+          window.location.reload();
+        });
       })
       .catch(error => {
         console.error('Error al guardar el tablero:', error);
@@ -311,17 +314,25 @@ export class CreadorTableroComponent {
   getFondoTablero() {
     const fondo = this.fondoTablero;
     if (!fondo) return {};
-    if (typeof fondo === 'string' && /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(fondo)) {
-      return {
-        'background-color': fondo
-      };
+    if (typeof fondo === 'string'){
+      if(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(fondo)) {
+        return {
+          'background-image': `url(${this.fondoTablero})`,
+          'background-size': 'cover',
+          'background-repeat': 'no-repeat'
+        };
+      }else{
+        return {
+          'background-color': fondo
+        };
+      }
     }
     const url = typeof fondo === 'string' ? fondo : URL.createObjectURL(fondo);
+    console.log(this.fondoTablero, "entre aca");
     return {
-      'background-image': `url(${this.fondoTablero})`,
+      'background-image': `url(${url})`,
       'background-size': 'cover',
-      'background-repeat': 'no-repeat',
-      'background-position': `center ${this.tamanioCeldaPx}px`
+      'background-repeat': 'no-repeat'
     };
   }
   paint() {

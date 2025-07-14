@@ -19,12 +19,13 @@ export class SimuladorTableroComponent {
   cargando = true;
   accionesDisponibles: string[] = ['audio', 'movimiento', 'luz'];
   zoomLevel = 1;
+  mainTagAccions: Accion[] = [];
   selectedCell: { fila: number; columna: number } | null = null;
   panelStyles: any = {};
   nuevaAccion: Accion | null = null;
   idAccion = 0;
-  robotPos: { fila: number; columna: number; direccion: string } = { fila: 0, columna: 0, direccion: "abajo" };
-  anteriorPobotPos: { fila: number; columna: number } = { fila: 0, columna: 0 };
+  robotPos: { fila: number; columna: number; direccion: string } = { fila: -1, columna: 0, direccion: "abajo" };
+  anteriorPobotPos: { fila: number; columna: number } = { fila: -1, columna: 0 };
   movimientosAcomulados: string[] = [];
 
   constructor(private route: ActivatedRoute,private conectionBack: ConectionBackService,
@@ -169,13 +170,90 @@ export class SimuladorTableroComponent {
   get luz(): Luz | null {
     return this.nuevaAccion instanceof Luz ? this.nuevaAccion as Luz : null;
   }
+  getFondoTablero() {
+    const fondo = this.tablero.fondo;
+
+    if (!fondo) return {};
+    if (typeof fondo === 'string' && /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(fondo)) {
+      return {
+        'background-color': fondo
+      };
+    }
+    const url = typeof fondo === 'string' ? fondo : URL.createObjectURL(fondo);
+    return {
+      'background-image': `url(${url})`,
+      'background-size': 'cover',
+      'background-position': 'center'
+    };
+  }
+  isFilePath(fondo: string): boolean {
+    return /\.(png|jpg|jpeg|gif|webp)$/i.test(fondo);
+  }
+  getEstiloCelda(fila: number, columna: number): any {
+    let tag: Tag | null = null;
+    let listTags: Tag[] = this.tablero.listaTags;
+    listTags.push(this.tablero.mainTag);
+    for (var tagAux of listTags) {
+      if(fila == tagAux.fila && columna == tagAux.columna){
+        tag = tagAux;
+        break;
+      }
+    }
+    if(tag == null){return;}
+    if (tag && tag.fondo) {
+      if(tag.fondo instanceof File){
+        const url = typeof tag.fondo === 'string' ? tag.fondo : URL.createObjectURL(tag.fondo);
+        return {
+          'background-image': `url(${url})`,
+          'background-size': 'cover',
+          'background-position': 'center',
+          'border-color': this.tablero.colorlineas
+        };
+      }else if(this.isFilePath(tag.fondo)){
+        return {
+          'background-image': `url(${tag.fondo})`,
+          'background-size': 'cover',
+          'background-position': 'center',
+          'border-color': this.tablero.colorlineas
+        };
+      }else{
+        return {
+          'background-color': `${tag.fondo}`,
+          'background-size': 'cover',
+          'background-position': 'center',
+          'border-color': this.tablero.colorlineas
+        };
+      }
+    }
+    return {
+      'background': 'transparent',
+      'border-color': this.tablero.colorlineas
+    };
+  }
   procesarTablero(tablero: Tablero) {
     this.verificarTamanioCeldas();
-    const filaEspecial = [ { acciones: [] } ];
-    const filasNormales = Array.from({ length: tablero.filas }, () =>
+    const grid: { acciones: Accion[] }[][] = Array.from({ length: tablero.filas }, () =>
       Array.from({ length: tablero.columnas }, () => ({ acciones: [] }))
     );
-    const grid: { acciones: Accion[] }[][] = [filaEspecial, ...filasNormales];
+    this.mainTagAccions = tablero.mainTag.listaAcciones.map(acc => {
+      switch (acc.tipo) {
+        case 'audio':
+          const audio = new Audio(acc.id);
+          audio.archivo = (acc as Audio).archivo;
+          return audio;
+        case 'movimiento':
+          const mov = new Movimiento(acc.id);
+          mov.direccion = (acc as Movimiento).direccion;
+          return mov;
+        case 'luz':
+          const luz = new Luz(acc.id);
+          luz.color = (acc as Luz).color;
+          luz.intervalo = (acc as Luz).intervalo;
+          return luz;
+        default:
+          return acc;
+      }
+    });
     for (const tag of tablero.listaTags) {
       const acciones: Accion[] = tag.listaAcciones.map(acc => {
         switch (acc.tipo) {
@@ -196,12 +274,7 @@ export class SimuladorTableroComponent {
             return acc;
         }
       });
-      const fila = tag.fila === 0 ? 0 : tag.fila;
-      const columna = tag.columna;
-      const filaReal = (fila === 0 && columna === 0) ? 0 : fila + 1;
-      if (grid[filaReal] && grid[filaReal][columna]) {
-        grid[filaReal][columna].acciones = acciones;
-      }
+      grid[tag.fila][tag.columna].acciones = acciones;
     }
     this.tableroGrid = grid;
   }

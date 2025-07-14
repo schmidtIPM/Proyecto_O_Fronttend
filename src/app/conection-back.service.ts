@@ -3,6 +3,7 @@ import axios from "axios";
 import { Tag, Accion, Tablero, Luz, Audio, Movimiento } from './models';
 import { Inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { SrvRecord } from 'node:dns';
 
 @Injectable({
   providedIn: 'root'
@@ -46,7 +47,7 @@ export class ConectionBackService {
       throw error;
     }
   }
-  async eliminarTablero(id: number): Promise<any> {
+  async eliminarTablero(id: string): Promise<any> {
     try {
       const response = await axios.delete(`${this.baseUrl}/tablero/eliminar/${id}`);
       return response.data;
@@ -56,7 +57,7 @@ export class ConectionBackService {
       throw error;
     }
   }
-  async modificarTablero(data: Tablero, id: number): Promise<any> {
+  async modificarTablero(data: Tablero, id: string): Promise<any> {
     try {
       await this.eliminarTablero(id);
       const response = await this.guardarTablero(data);

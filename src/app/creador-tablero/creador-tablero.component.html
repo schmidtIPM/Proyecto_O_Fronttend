@@ -36,24 +36,17 @@
       <button *ngIf="zoomLevel != 1" (click)="zoomReset()">Reset</button>
     </div>
     <div class="tablero-wrapper">
-      <div class="tablero-zoom" [ngStyle]="{ transform: 'scale(' + zoomLevel + ')' }" >
+      <div class="tablero-zoom" [ngStyle]="{ transform: 'scale(' + zoomLevel + ')' }">
         <table [ngStyle]="getFondoTablero()">
           <tr *ngFor="let fila of tableroGrid; let i = index">
-            <ng-container *ngIf="i === 0; else filaNormal">
-              <td (click)="seleccionarCelda(0, 0)" [ngStyle]="getEstiloCelda(0, 0)">
-                <div class="celda" style="background: transparent;">
-                  <div><p id="masTablero">+</p></div>
-                </div>
-              </td>
-            </ng-container>
-            <ng-template #filaNormal>
+            <ng-container>
               <td *ngFor="let celda of fila; let j = index"
                 (click)="seleccionarCelda(i, j)" [ngStyle]="getEstiloCelda(i, j)">
                 <div class="celda" style="background: transparent;">
                   <div><p id="masTablero">+</p></div>
                 </div>
               </td>
-            </ng-template>
+            </ng-container>
           </tr>
         </table>
       </div>
@@ -67,8 +60,61 @@
       <label for="inputFondo" class="boton-browse">Agregar fondo</label>
       <input id="inputFondo" type="file" accept=".png" (change)="onArchivoImagenChange($event)" style="display: none;">
       <button mat-raised-button color="primary" class="boton-browse" (click)="paint()">Abrir Paint</button>
-      <h2>Panel de acciones</h2>
-      <p>Selecciona una celda del tablero para ver o editar sus acciones.</p>
+      <div style="text-align: left; color: black;">
+        <div class="agregar">
+          <p><strong>Agregar acción a la main tag:</strong></p>
+          <div class="botones">
+            <button *ngFor="let tipo of accionesDisponibles; let i = index"
+                    (click)="mostrarFormularioAccion(tipo)"
+                    [ngStyle]="{ 'background-color': colores[i % colores.length] }">
+              + {{ tipo.charAt(0).toUpperCase() + tipo.slice(1) }}
+            </button>
+          </div>
+        </div>
+        <div *ngIf="nuevaAccion" class="formulario-accion">
+          <h4>Configurar acción: {{ nuevaAccion.tipo.charAt(0).toUpperCase() + nuevaAccion.tipo.slice(1) }}</h4>
+          <div *ngIf="nuevaAccion?.tipo === 'audio'" class="luz">
+            <label for="audioInput" class="boton-browse">Agregar archivo MP3</label>
+            <input id="audioInput" type="file" accept=".mp3" (change)="onArchivoAudioChange($event, true)" style="display: none;">
+          </div>
+          <div *ngIf="nuevaAccion?.tipo === 'movimiento'" class ="movimiento">
+            <p>Seleccionar acción:</p>
+            <button (click)="setDireccionMovimiento('arriba', true)"
+            [ngStyle]="{ 'background-color': '#FF7F50', color: 'white' }">↑</button>
+            <button (click)="setDireccionMovimiento('abajo', true)"
+            [ngStyle]="{ 'background-color': '#3498DB', color: 'white' }">↓</button>
+            <button (click)="setDireccionMovimiento('derecha', true)"
+            [ngStyle]="{ 'background-color': '#2980B9', color: 'white' }">⟳</button>
+            <button (click)="setDireccionMovimiento('izquierda', true)"
+            [ngStyle]="{ 'background-color': '#20B2AA', color: 'white' }">⟲</button>
+          </div>
+          <div *ngIf="luz" class = "luz">
+            <input type="color" [(ngModel)]="luz.color">
+            <div>
+              <label>Intervalo (ms):</label>
+              <input type="number" [(ngModel)]="luz.intervalo">
+            </div>
+            <button (click)="setLuz(true)">Agregar</button>
+          </div>
+        </div>
+        <div class="preview">
+          <p><strong>Acciones actuales:</strong></p>
+          <ul>
+            <li *ngFor="let accion of mainTagAccions"
+            [ngClass]="'accion-' + accion.constructor.name" style="margin-bottom: 2px;">
+              {{ getDescripcionAccion(accion) }}
+                <ng-container *ngIf="esAudio(accion)">
+                  <button (click)="reproducirAudio(accion.archivo)">🔊</button>
+                </ng-container>
+                <button class="cerrar" (click)="eliminarAccion(accion, true)" style="float: right; font-size: 0.89em;">✕</button>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="informacionPanelLateralSinCelda">
+        <h2>Panel de acciones</h2>
+        <p>Selecciona una celda del tablero para ver o editar sus acciones.</p>
+      </div>
     </div>
     <div *ngIf="selectedCell">
       <div class="panel-header">
@@ -95,23 +141,18 @@
         <h4>Configurar acción: {{ nuevaAccion.tipo.charAt(0).toUpperCase() + nuevaAccion.tipo.slice(1) }}</h4>
         <div *ngIf="nuevaAccion?.tipo === 'audio'" class="luz">
           <label for="audioInput" class="boton-browse">Agregar archivo MP3</label>
-          <input id="audioInput" type="file" accept=".mp3" (change)="onArchivoAudioChange($event)" style="display: none;">
+          <input id="audioInput" type="file" accept=".mp3" (change)="onArchivoAudioChange($event, false)" style="display: none;">
         </div>
         <div *ngIf="nuevaAccion?.tipo === 'movimiento'" class ="movimiento">
           <p>Seleccionar acción:</p>
-          <button (click)="setDireccionMovimiento('arriba')"
+          <button (click)="setDireccionMovimiento('arriba', false)"
           [ngStyle]="{ 'background-color': '#FF7F50', color: 'white' }">↑</button>
-
-          <button (click)="setDireccionMovimiento('abajo')"
+          <button (click)="setDireccionMovimiento('abajo', false)"
           [ngStyle]="{ 'background-color': '#3498DB', color: 'white' }">↓</button>
-
-          <button (click)="setDireccionMovimiento('derecha')"
+          <button (click)="setDireccionMovimiento('derecha', false)"
           [ngStyle]="{ 'background-color': '#2980B9', color: 'white' }">⟳</button>
-
-          <button (click)="setDireccionMovimiento('izquierda')"
+          <button (click)="setDireccionMovimiento('izquierda', false)"
           [ngStyle]="{ 'background-color': '#20B2AA', color: 'white' }">⟲</button>
-
-          <!-- <p><strong>Elegido:</strong> {{ getDireccionMovimiento() }}</p> -->
         </div>
         <div *ngIf="luz" class = "luz">
           <input type="color" [(ngModel)]="luz.color">
@@ -119,9 +160,8 @@
             <label>Intervalo (ms):</label>
             <input type="number" [(ngModel)]="luz.intervalo">
           </div>
-          <button (click)="setLuz(luz.color, luz.intervalo)">Agregar</button>
+          <button (click)="setLuz(false)">Agregar</button>
         </div>
-
       </div>
       <div class="preview">
         <p><strong>Acciones actuales:</strong></p>
@@ -129,11 +169,10 @@
           <li *ngFor="let accion of tableroGrid[selectedCell.fila][selectedCell.columna].acciones"
           [ngClass]="'accion-' + accion.constructor.name" style="margin-bottom: 2px;">
             {{ getDescripcionAccion(accion) }}
-
               <ng-container *ngIf="esAudio(accion)">
                 <button (click)="reproducirAudio(accion.archivo)">🔊</button>
               </ng-container>
-              <button class="cerrar" (click)="eliminarAccion(accion)" style="float: right; font-size: 0.89em;">✕</button>
+              <button class="cerrar" (click)="eliminarAccion(accion, false)" style="float: right; font-size: 0.89em;">✕</button>
           </li>
         </ul>
       </div>

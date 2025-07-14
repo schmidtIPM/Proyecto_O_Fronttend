@@ -20,15 +20,34 @@
       </div>
       <div class="tablero-wrapper">
         <div class="tablero-zoom" [ngStyle]="{ transform: 'scale(' + zoomLevel + ')' }">
-          <table>
+           <table class="tablero-especial" style="margin: 0;">
+            <tr>
+              <td (click)="seleccionarCelda(-1, 0)">
+                <div class="celda">
+                  <div>
+                    <p id="masTablero">(-1, 0)</p>
+                  </div>
+                  <div *ngIf="robotPos.fila === -1 && robotPos.columna === 0" class="contenedor-robot"
+                    [ngClass]="{
+                      'rotar-90': robotPos.direccion === 'derecha',
+                      'rotar-90neg': robotPos.direccion === 'izquierda',
+                      'rotar-180': robotPos.direccion === 'abajo'
+                    }">
+                    <strong style="color: red;">🤖</strong>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </table>
+          <table [ngStyle]="getFondoTablero()">
             <tr *ngFor="let fila of tableroGrid; let i = index">
-              <ng-container *ngIf="i === 0; else otrasFilas">
-                <td (click)="seleccionarCelda(0, 0)">
-                  <div class="celda">
-                    <div>
-                      <p id="masTablero">(0, 0)</p>
-                    </div>
-                    <div *ngIf="robotPos.fila === 0 && robotPos.columna === 0" class="contenedor-robot"
+              <td *ngFor="let celda of fila; let j = index" (click)="seleccionarCelda(i, j)" 
+                 [ngStyle]="getEstiloCelda(i, j)">
+                <div class="celda"style="background: transparent;">
+                  <div>
+                    <p id="masTablero">+</p>
+                  </div>
+                  <div *ngIf="robotPos.fila === i && robotPos.columna === j" class="contenedor-robot"
                       [ngClass]="{
                         'rotar-90': robotPos.direccion === 'derecha',
                         'rotar-90neg': robotPos.direccion === 'izquierda',
@@ -36,26 +55,8 @@
                       }">
                       <strong style="color: red;">🤖</strong>
                     </div>
-                  </div>
-                </td>
-              </ng-container>
-              <ng-template #otrasFilas>
-                <td *ngFor="let celda of fila; let j = index" (click)="seleccionarCelda(i, j)">
-                  <div class="celda">
-                    <div>
-                      <p id="masTablero">({{ i }}, {{ j }})</p>
-                    </div>
-                    <div *ngIf="robotPos.fila === i && robotPos.columna === j" class="contenedor-robot"
-                      [ngClass]="{
-                        'rotar-90': robotPos.direccion === 'derecha',
-                        'rotar-90neg': robotPos.direccion === 'izquierda',
-                        'rotar-180': robotPos.direccion === 'abajo'
-                      }">
-                      <strong style="color: red;">🤖</strong>
-                    </div>
-                  </div>
-                </td>
-              </ng-template>
+                </div>
+              </td>
             </tr>
           </table>
         </div>
@@ -81,14 +82,24 @@
       <div class="preview">
         <p><strong>Acciones actuales:</strong></p>
         <ul>
-          <li *ngFor="let accion of tableroGrid[selectedCell.fila][selectedCell.columna].acciones"
-          [ngClass]="'accion-' + accion.constructor.name">
-            {{ getDescripcionAccion(accion) }}
-
+          <ng-container *ngIf="selectedCell.fila === -1">
+            <li *ngFor="let accion of mainTagAccions"
+                [ngClass]="'accion-' + accion.constructor.name">
+              {{ getDescripcionAccion(accion) }}
               <ng-container *ngIf="esAudio(accion)">
                 <button (click)="reproducirAudio(accion.archivo)">🔊</button>
               </ng-container>
-          </li>
+            </li>
+          </ng-container>
+          <ng-container *ngIf="selectedCell.fila !== -1">
+            <li *ngFor="let accion of tableroGrid[selectedCell.fila][selectedCell.columna].acciones"
+                [ngClass]="'accion-' + accion.constructor.name">
+              {{ getDescripcionAccion(accion) }}
+              <ng-container *ngIf="esAudio(accion)">
+                <button (click)="reproducirAudio(accion.archivo)">🔊</button>
+              </ng-container>
+            </li>
+          </ng-container>
         </ul>
       </div>
   </div>

@@ -20,8 +20,7 @@ export class MisTablerosComponent {
   ) {}
   tableros: any[] = [];
   celdasVacias = Array(9); 
-
- async ngOnInit() {
+  async ngOnInit() {
     this.cargarTableros();
     window.addEventListener('resize', () => {
       this.getVisibleCount(); 
@@ -32,6 +31,7 @@ export class MisTablerosComponent {
       this.estrella = response.find((file: string) => file.includes('estrella.png')) || '';
     }
   }
+
 
   getFondoTablero(tablero: Tablero) {
     const fondo = tablero.fondo;
@@ -67,7 +67,7 @@ export class MisTablerosComponent {
       console.error('Error al cargar los tableros:', error);
     }
   }
-  async eliminarTablero(id: number) {
+  async eliminarTablero(id: string) {
     try {
       const response = await this.conectionBack.eliminarTablero(id);
       console.log('Tablero eliminado:', response);

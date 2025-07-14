@@ -18,7 +18,7 @@
             <h3>{{ tablero.nombre }}</h3>
             <button class="btn-fav" (click)="actualizarFavorito(tablero)"><img *ngIf="!tablero.favoritos" [src]="estrella"><img *ngIf="tablero.favoritos" [src]="estrellaAmarilla"></button>
           </div>
-          <button class="btn" (click)="eliminarTablero(tablero.id)">Eliminar</button>
+          <button class="btn" (click)="eliminarTablero(tablero._id)">Eliminar</button>
           <button class="btn" (click)="irAEditarTablero(tablero._id)">Editar</button>
           <button class="btn" (click)="irASimularTablero(tablero._id)">Simular</button>
         </div>
@@ -47,7 +47,7 @@
             <h3>{{ tablero.nombre }}</h3>
             <button class="btn-fav" (click)="actualizarFavorito(tablero)"><img *ngIf="!tablero.favoritos" [src]="estrella"><img *ngIf="tablero.favoritos" [src]="estrellaAmarilla"></button>
           </div>
-          <button class="btn" (click)="eliminarTablero(tablero.id)">Eliminar</button>
+          <button class="btn" (click)="eliminarTablero(tablero._id)">Eliminar</button>
           <button class="btn" (click)="irAEditarTablero(tablero._id)">Editar</button>
           <button class="btn" (click)="irASimularTablero(tablero._id)">Simular</button>
         </div>

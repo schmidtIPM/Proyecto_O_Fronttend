@@ -7,6 +7,7 @@ import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { MiniPaintComponent } from '../mini-paint/mini-paint.component';
 import { LargeNumberLike } from 'node:crypto';
+import { group } from 'node:console';
 
 @Component({
   selector: 'app-actualizar-tablero',
@@ -21,6 +22,7 @@ export class ActualizarTableroComponent implements OnInit {
   cargando = true;
   accionesDisponibles: string[] = ['audio', 'movimiento', 'luz'];
   zoomLevel = 1;
+  mainTagAccions: Accion[] = [];
   selectedCell: { fila: number; columna: number } | null = null;
   panelStyles: any = {};
   nuevaAccion: Accion | null = null;
@@ -55,16 +57,17 @@ export class ActualizarTableroComponent implements OnInit {
       this.cargando = false;
     });
   }
-  onArchivoAudioChange(event: any) {
+  onArchivoAudioChange(event: any, mainTag: boolean) {
     const file = event.target.files[0];
     if (file && this.nuevaAccion instanceof Audio) {
       this.nuevaAccion.archivo = file;
-    } 
-    if (this.selectedCell && this.nuevaAccion) {
-      if (this.nuevaAccion instanceof Audio) {
-        console.log("Archivo MP3 cargado:", this.nuevaAccion.archivo);
+    }
+    if (mainTag && this.nuevaAccion){
+      this.mainTagAccions.push(this.nuevaAccion);
+    } else{
+      if (this.selectedCell && this.nuevaAccion) {
+        this.tableroGrid[this.selectedCell.fila][this.selectedCell.columna].acciones.push(this.nuevaAccion);
       }
-      this.tableroGrid[this.selectedCell.fila][this.selectedCell.columna].acciones.push(this.nuevaAccion);
     }
     this.nuevaAccion = null;
   }
@@ -84,27 +87,34 @@ export class ActualizarTableroComponent implements OnInit {
       'background-position': 'center'
     };
   }
-  setLuz(color : string, intervalo: number){
-    if (this.selectedCell && this.nuevaAccion) {
-      if (this.nuevaAccion instanceof Luz) {
-        console.log("Luz cargada:", this.nuevaAccion.color);
-      }
-      this.tableroGrid[this.selectedCell.fila][this.selectedCell.columna].acciones.push(this.nuevaAccion);
-    }
-    this.nuevaAccion = null;
-  }
   getDireccionMovimiento(): string {
     if (this.nuevaAccion instanceof Movimiento) {
       return this.nuevaAccion.direccion || '';
     }
     return '';
   }
-  setDireccionMovimiento(direccion: 'arriba' | 'abajo' | 'izquierda' | 'derecha') {
+  setLuz(mainTag: boolean){
+    if(mainTag){
+      if (this.nuevaAccion) {
+        this.mainTagAccions.push(this.nuevaAccion);
+      }
+    }else{
+      if (this.selectedCell && this.nuevaAccion) {
+        this.tableroGrid[this.selectedCell.fila][this.selectedCell.columna].acciones.push(this.nuevaAccion);
+      }
+    }
+    this.nuevaAccion = null;
+  }
+  setDireccionMovimiento(direccion: 'arriba' | 'abajo' | 'izquierda' | 'derecha', mainTag: boolean) {
     if (this.nuevaAccion instanceof Movimiento) {
       this.nuevaAccion.direccion = direccion;
     }
-    if (this.selectedCell && this.nuevaAccion) {
-      this.tableroGrid[this.selectedCell.fila][this.selectedCell.columna].acciones.push(this.nuevaAccion);
+    if(mainTag && this.nuevaAccion){
+      this.mainTagAccions.push(this.nuevaAccion);
+    }else{
+      if (this.selectedCell && this.nuevaAccion) {
+        this.tableroGrid[this.selectedCell.fila][this.selectedCell.columna].acciones.push(this.nuevaAccion);
+      }
     }
     this.nuevaAccion = null;
   }
@@ -128,11 +138,28 @@ export class ActualizarTableroComponent implements OnInit {
   }
   procesarTablero(tablero: Tablero) {
     this.verificarTamanioCeldas();
-    const filaEspecial = [ { acciones: [] } ];
-    const filasNormales = Array.from({ length: tablero.filas }, () =>
+    const grid: { acciones: Accion[] }[][] = Array.from({ length: tablero.filas }, () =>
       Array.from({ length: tablero.columnas }, () => ({ acciones: [] }))
     );
-    const grid: { acciones: Accion[] }[][] = [filaEspecial, ...filasNormales];
+    this.mainTagAccions = tablero.mainTag.listaAcciones.map(acc => {
+      switch (acc.tipo) {
+        case 'audio':
+          const audio = new Audio(acc.id);
+          audio.archivo = (acc as Audio).archivo;
+          return audio;
+        case 'movimiento':
+          const mov = new Movimiento(acc.id);
+          mov.direccion = (acc as Movimiento).direccion;
+          return mov;
+        case 'luz':
+          const luz = new Luz(acc.id);
+          luz.color = (acc as Luz).color;
+          luz.intervalo = (acc as Luz).intervalo;
+          return luz;
+        default:
+          return acc;
+      }
+    });
     for (const tag of tablero.listaTags) {
       const acciones: Accion[] = tag.listaAcciones.map(acc => {
         switch (acc.tipo) {
@@ -153,12 +180,7 @@ export class ActualizarTableroComponent implements OnInit {
             return acc;
         }
       });
-      const fila = tag.fila === 0 ? 0 : tag.fila;
-      const columna = tag.columna;
-      const filaReal = (fila === 0 && columna === 0) ? 0 : fila + 1;
-      if (grid[filaReal] && grid[filaReal][columna]) {
-        grid[filaReal][columna].acciones = acciones;
-      }
+      grid[tag.fila][tag.columna].acciones = acciones;
     }
     this.tableroGrid = grid;
   }
@@ -284,13 +306,22 @@ export class ActualizarTableroComponent implements OnInit {
       }
     }, 0);
   }
-  eliminarAccion(accionAEliminar: Accion) {
-    if (!this.selectedCell) return;
-
-    const acciones = this.tableroGrid[this.selectedCell.fila][this.selectedCell.columna].acciones;
-    const index = acciones.findIndex(acc => acc.id === accionAEliminar.id);
-    if (index !== -1) {
-      acciones.splice(index, 1);
+  eliminarAccion(accionAEliminar: Accion, mainTag: boolean) {
+    if(mainTag){
+      const acciones = this.mainTagAccions;
+      const index = acciones.findIndex(acc => acc.id === accionAEliminar.id);
+      if (index !== -1) {
+        acciones.splice(index, 1);
+      }
+      this.mainTagAccions = acciones;
+    }else{
+      if (!this.selectedCell) return;
+      const acciones = this.tableroGrid[this.selectedCell.fila][this.selectedCell.columna].acciones;
+      const index = acciones.findIndex(acc => acc.id === accionAEliminar.id);
+      if (index !== -1) {
+        acciones.splice(index, 1);
+      }
+      this.tableroGrid[this.selectedCell.fila][this.selectedCell.columna].acciones = acciones;
     }
   }
   getDescripcionAccion(accion: Accion): string {
@@ -305,14 +336,15 @@ export class ActualizarTableroComponent implements OnInit {
   }
   guardarTablero() {
     const tags: Tag[] = [];
-    let tagId = 0;
     for (let filaIndex = 0; filaIndex < this.tableroGrid.length; filaIndex++) {
       for (let columnaIndex = 0; columnaIndex < this.tableroGrid[filaIndex].length; columnaIndex++) {
         const celda = this.tableroGrid[filaIndex][columnaIndex];
         const tagFondo = this.tagGrid.find(t => t.fila === filaIndex && t.columna === columnaIndex);
-        tags.push(new Tag(tagId++, celda.acciones, filaIndex, columnaIndex, tagFondo?.fondo));
+        tags.push(new Tag(Math.floor(Math.random() * (564 - 0 + 1)) +5465, celda.acciones, filaIndex, columnaIndex, tagFondo?.fondo));
       }
-    } 
+    }
+    let mainTag: Tag = new Tag(Math.floor(Math.random() * (564 - 0 + 1)) +5465, 
+        this.mainTagAccions, -1, -1, "FFFFFF");
     const fondoFinal = this.tablero.fondo instanceof File
       ? URL.createObjectURL(this.tablero.fondo)
       : this.tablero.fondo;
@@ -321,17 +353,21 @@ export class ActualizarTableroComponent implements OnInit {
       this.tablero.nombre,
       this.tablero.filas,
       this.tablero.columnas,
-      tags[0],
+      mainTag,
       tags,
-      this.tablero._id, // esto no estaba antes 
+      this.tablero._id,
       this.tablero.colorlineas,
-      fondoFinal,
+      this.tablero.fondo,
       this.tablero.tamanioCelda
     );
-    this.conectionBack.modificarTablero(tablero, this.tablero.id)
+    if(!this.tablero._id){return;}
+    this.conectionBack.modificarTablero(tablero, this.tablero._id)
       .then(respuesta => {
         console.log('Tablero guardado correctamente:', respuesta);
         alert('Tablero guardado con éxito');
+        this.router.navigate(['/']).then(() => {
+          window.location.reload();
+        });
       })
       .catch(error => {
         console.error('Error al guardar el tablero:', error);
