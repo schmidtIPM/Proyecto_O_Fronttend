@@ -12,3 +12,27 @@ app-root {
 
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+.p-carousel-prev-button,
+.p-carousel-next-button {
+  background-color: #FF7F50;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 2.5rem;
+  height: 2.5rem;
+  transform: translateY(-50%);
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+.p-carousel-prev-button::before,
+.p-carousel-next-button::before {
+  font-size: 1.2rem;
+}
+.p-carousel{
+  margin-left: 5%;
+  margin-right: 5%;
+}

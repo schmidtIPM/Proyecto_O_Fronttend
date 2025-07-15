@@ -3,15 +3,26 @@ import { ConectionBackService } from '../conection-back.service';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { Tablero } from '../models';
+import { CarouselModule } from 'primeng/carousel';
+import { ButtonModule } from 'primeng/button';
 
 @Component({
   selector: 'app-mis-tableros',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, CarouselModule, ButtonModule],
   templateUrl: './mis-tableros.component.html',
   styleUrl: './mis-tableros.component.css'
 })
 export class MisTablerosComponent {
+  responsiveOptions = [
+    {breakpoint: '2640px', numVisible: 6, numScroll: 1},
+    {breakpoint: '2280px', numVisible: 5, numScroll: 1},
+    {breakpoint: '1920px', numVisible: 4, numScroll: 1},
+    {breakpoint: '1560px', numVisible: 3, numScroll: 1},
+    {breakpoint: '1200px', numVisible: 2, numScroll: 1},
+    {breakpoint: '840px', numVisible: 1, numScroll: 1}
+  ];
+
   estrella: string = "";
   estrellaAmarilla: string = "";
   constructor(
@@ -22,9 +33,6 @@ export class MisTablerosComponent {
   celdasVacias = Array(9); 
   async ngOnInit() {
     this.cargarTableros();
-    window.addEventListener('resize', () => {
-      this.getVisibleCount(); 
-    });
     const response = await this.conectionBack.getImagenesPagina();
     if (response && response.length > 0) {
       this.estrellaAmarilla = response.find((file: string) => file.includes('estrellaAmarilla.png')) || '';
@@ -99,29 +107,6 @@ export class MisTablerosComponent {
         console.error('Error al actualizar el tablero:', error);
       });
   }
-  readonly CARD_WIDTH_PX = 300;
-  currentIndex = 0;
- 
-  getVisibleCount(): number {
-  const width = window.innerWidth;
-  if (width <= 480) return 1;
-  if (width <= 768) return 2;
-  if (width <= 992) return 3;
-  if (width <= 1200) return 4;
-  return 4;
-}
-
-  siguiente() {
-    const maxIndex = this.tableros.length - this.getVisibleCount();
-    if (this.currentIndex < maxIndex) {
-      this.currentIndex++;
-    }
-  }
-  anterior() {
-   if (this.currentIndex > 0) {
-      this.currentIndex--;
-    }
-  }
   favoritosIndex = 0;
   get tablerosFavoritos(): any[] {
     return this.tableros.filter(t => t.favoritos);
@@ -131,24 +116,5 @@ export class MisTablerosComponent {
   }
   get tablerosNomales(): any[] {
     return this.tableros.filter(t =>!t.predeterminado); 
-  }
-  anteriorFavoritos() {
-    if (this.favoritosIndex > 0) {
-      this.favoritosIndex--;
-    }
-  }
-  siguienteFavoritos() {
-    const maxIndex = this.tablerosFavoritos.length - this.getVisibleCount();
-    if (this.favoritosIndex < maxIndex) {
-      this.favoritosIndex++;
-    }
-  }
-  currentIndexPred = 0;
-  siguientePred() {
-    const maxIndex = this.tablerosPredeterminados.length - this.getVisibleCount();
-    if (this.currentIndexPred < maxIndex) this.currentIndexPred++;
-  }
-  anteriorPred() {
-    if (this.currentIndexPred > 0) this.currentIndexPred--;
   }
 }
