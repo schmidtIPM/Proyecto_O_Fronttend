@@ -4,6 +4,7 @@ import { ConectionBackService } from '../conection-back.service';
 import { Tablero, Tag, Accion, Audio, Movimiento, Luz } from '../models';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-simulador-tablero',
@@ -29,7 +30,7 @@ export class SimuladorTableroComponent {
   movimientosAcomulados: string[] = [];
 
   constructor(private route: ActivatedRoute,private conectionBack: ConectionBackService,
-    private router: Router){}
+    private router: Router, private snackBar: MatSnackBar){}
   async play() {
     this.anteriorPobotPos = { ...this.robotPos };
     for (const mov of this.movimientosAcomulados) {
@@ -152,7 +153,11 @@ export class SimuladorTableroComponent {
     if (!id) return;
     this.conectionBack.getTableroPorId(id).then(tablero => {
       if (!tablero) {
-        alert('Tablero no encontrado');
+        this.snackBar.open('Tablero no encontrado', 'Cerrar', { 
+          duration: 3000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+        });
         this.router.navigate(['/']);
         this.cargando = false;
         return;

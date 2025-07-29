@@ -8,6 +8,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MiniPaintComponent } from '../mini-paint/mini-paint.component';
 import { LargeNumberLike } from 'node:crypto';
 import { group } from 'node:console';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-actualizar-tablero',
@@ -35,7 +36,8 @@ export class ActualizarTableroComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private conectionBack: ConectionBackService,
-    private router: Router, private dialog: MatDialog
+    private router: Router, private dialog: MatDialog,
+    private snackBar: MatSnackBar
   ) {}
   ngOnInit(): void {
     const id: string | null = this.route.snapshot.paramMap.get('id');
@@ -364,14 +366,22 @@ export class ActualizarTableroComponent implements OnInit {
     this.conectionBack.modificarTablero(tablero, this.tablero._id)
       .then(respuesta => {
         console.log('Tablero guardado correctamente:', respuesta);
-        alert('Tablero guardado con éxito');
+        this.snackBar.open('Tablero guardado con éxito', 'Cerrar', {
+          duration: 3000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+        });
         this.router.navigate(['/']).then(() => {
           window.location.reload();
         });
       })
       .catch(error => {
         console.error('Error al guardar el tablero:', error);
-        alert('Hubo un error al guardar el tablero.');
+        this.snackBar.open('Hubo un error al guardar el tablero.', 'Cerrar', {
+          duration: 3000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+        });
       });
   }
   cerrarPanel() {

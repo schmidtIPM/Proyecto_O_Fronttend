@@ -1,0 +1,19 @@
+<div class="faq-wrapper">
+  <section class="faq-header">
+    <h1>Preguntas frecuentes</h1>
+    <p>
+      Aquí encontrarás respuestas a las preguntas más comunes sobre O-bot y todo lo relacionado a él.
+    </p>
+  </section>
+
+  <section class="faq-container">
+    <div class="faq-item" *ngFor="let faq of faqs; let i = index">
+      <div class="faq-question" (click)="toggle(i)">
+        <span>{{ faq.pregunta }}</span>
+        <span class="arrow" [class.rotated]="faq.abierto">▼</span>
+      </div>
+      <div class="faq-answer" *ngIf="faq.abierto" [innerHTML]="faq.respuesta"></div>
+
+    </div>
+  </section>
+</div>

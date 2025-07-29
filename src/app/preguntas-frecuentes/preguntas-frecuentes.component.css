@@ -1,0 +1,84 @@
+.faq-wrapper {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+  font-family: Arial, sans-serif;
+  background-color: #fff;
+}
+
+.faq-header {
+  background-color: #beddff;
+  padding: 2rem;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+}
+
+.faq-header h1 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  font-weight: 700;
+  color: #000000;
+}
+
+.faq-header p {
+  font-size: 1rem;
+  color: #303030;
+  line-height: 1.6;
+}
+
+.faq-container {
+  background-color: #fdfdfd;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.05);
+}
+
+.faq-container {
+  color: #2c83e0;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.faq-item {
+  border-top: 1px solid #ddd;
+  padding: 1rem 0;
+}
+
+.faq-item:first-child {
+  border-top: none;
+}
+
+.faq-question {
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #222;
+}
+
+.faq-question:hover {
+  color: #2c83e0;
+}
+
+.arrow {
+  transition: transform 0.2s ease;
+}
+
+.arrow.rotated {
+  transform: rotate(180deg);
+}
+
+.faq-answer {
+  margin-top: 0.5rem;
+  font-size: 0.95rem;
+  color: #555;
+  line-height: 1.5;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}

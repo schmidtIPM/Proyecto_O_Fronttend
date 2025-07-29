@@ -7,6 +7,7 @@ import { ElementRef, ViewChild, AfterViewInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MiniPaintComponent } from '../mini-paint/mini-paint.component';
 import { ActivatedRoute, Route, Router } from '@angular/router';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   standalone: true,
@@ -36,8 +37,7 @@ export class CreadorTableroComponent {
   showPopup = false;
   tamanioCelda = 10;
 
-  
-  constructor(private conectionBack: ConectionBackService, private dialog: MatDialog, private router: Router) {}
+  constructor(private conectionBack: ConectionBackService, private dialog: MatDialog, private router: Router, private snackBar: MatSnackBar) {}
 
   generarTablero() {
     this.tableroGrid = Array.from({ length: this.filas }, () =>
@@ -235,14 +235,22 @@ export class CreadorTableroComponent {
     this.conectionBack.guardarTablero(tablero)
       .then(respuesta => {
         console.log('Tablero guardado correctamente:', respuesta);
-        alert('Tablero guardado con éxito');
+        this.snackBar.open('Tablero guardado con éxito', 'Cerrar', { 
+          duration: 3000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+        });
         this.router.navigate(['/']).then(() => {
           window.location.reload();
         });
       })
       .catch(error => {
         console.error('Error al guardar el tablero:', error);
-        alert('Hubo un error al guardar el tablero.');
+        this.snackBar.open('Hubo un error al guardar el tablero.', 'Cerrar', {
+          duration: 3000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+        });
       });
   }
   cerrarPanel() {
