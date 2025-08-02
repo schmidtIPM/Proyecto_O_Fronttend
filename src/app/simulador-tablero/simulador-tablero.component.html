@@ -2,14 +2,16 @@
   <p *ngIf="cargando">Cargando tablero...</p>
 
   <div *ngIf="!cargando && tableroGrid.length" class="contenedor-tablero-panel">
-    <div class="controles">
-        <button (click)="moverRobot('arriba')">⬆️</button>
-        <div>
-            <button (click)="moverRobot('izquierda')">⬅️</button>
-            <button (click)="play()">▶️</button>
-            <button (click)="moverRobot('derecha')">➡️</button>
-        </div>
-        <button (click)="moverRobot('abajo')">⬇️</button>
+    <div class="contenedor-controles">
+      <div class="controles">
+          <button class="boton-arriba"(click)="moverRobot('arriba')">➜</button>
+          <div>
+              <button class= "boton-izquierda" (click)="moverRobot('izquierda')">➜</button>
+              <button class= "boton-play" (click)="play()">▶︎</button>
+              <button class= "boton-derecha" (click)="moverRobot('derecha')">➜</button>
+          </div>
+          <button class="boton-abajo"(click)="moverRobot('abajo')">➜</button>
+      </div>
     </div>
     <div class="tablero-container">
       <div *ngIf="mostrarZoom" style="margin-bottom: 1rem;">

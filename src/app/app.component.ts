@@ -27,4 +27,7 @@ export class AppComponent {
   irAHome() {
     this.router.navigate(['/']);
   }
+  irAPreguntas() {
+    this.router.navigate(['/preguntas-frecuentes']);
+  }
 }

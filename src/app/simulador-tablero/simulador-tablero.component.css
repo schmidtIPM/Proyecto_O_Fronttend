@@ -1,10 +1,5 @@
 /*movimiento*/
-.controles{
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 1em;
-}
+
 .rotar-90 {
   transform: rotate(90deg);
   transition: transform 0.3s ease;
@@ -177,7 +172,7 @@ td {
 }
 
 .botones button {
-  color: white;
+  color: rgb(0, 0, 0);
   border: none;
   padding: 10px;
   border-radius: 5px;
@@ -185,6 +180,50 @@ td {
   font-weight: bold;
   width: 100%;
 }
+
+.contenedor-controles{
+  position: absolute;
+  top: 50%;
+  left: 15%;
+  transform: translate(-50%, -50%);
+
+}
+
+.controles{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.controles button{
+  width: 3.7rem;
+  height: 3.7rem;
+  border-radius: 10%;
+  font-size: 1.1rem;
+  background-color:#FF7F50; 
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  margin: 0.2rem;
+}
+
+.controles button:hover{
+  background-color:#e07148;
+}
+.boton-izquierda{
+  transform: rotate(180deg);
+}
+
+.boton-arriba{
+  transform: rotate(270deg);
+}
+
+.boton-abajo{
+  transform: rotate(90deg);
+}
+
+
 
 .movimiento {
   display: flex;
