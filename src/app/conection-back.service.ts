@@ -49,7 +49,7 @@ export class ConectionBackService {
   }
   async eliminarTablero(id: string): Promise<any> {
     try {
-      const response = await axios.delete(`${this.baseUrl}/tablero/eliminar/${id}`);
+      const response = await axios.delete(`${this.baseUrl}/tablero/eliminar`, { params: { _id: id } });
       return response.data;
     }
     catch (error) {
@@ -69,7 +69,7 @@ export class ConectionBackService {
   }
   async getTableroPorId(id: string): Promise<Tablero | null> {
     try { 
-      const response = await axios.get(`${this.baseUrl}/tablero/id/${id}`);
+      const response = await axios.get(`${this.baseUrl}/tablero/id`, { params: { _id: id } });
       const tableros: Tablero[] = [response.data];
       return this.procesarRutas(tableros)[0];
     } catch (error) {
