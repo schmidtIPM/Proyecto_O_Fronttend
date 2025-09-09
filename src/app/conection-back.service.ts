@@ -49,7 +49,7 @@ export class ConectionBackService {
   }
   async eliminarTablero(id: string): Promise<any> {
     try {
-      const response = await axios.delete(`${this.baseUrl}/tablero/eliminar`, { params: { _id: id } });
+      const response = await axios.delete(`${this.baseUrl}/tablero/eliminar?id${id}`);
       return response.data;
     }
     catch (error) {
