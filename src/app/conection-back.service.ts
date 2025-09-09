@@ -9,7 +9,7 @@ import { SrvRecord } from 'node:dns';
   providedIn: 'root'
 })
 export class ConectionBackService {
-  private baseUrl = 'http://localhost:3000';
+  private baseUrl = 'http://1920.168.4.1';
   constructor(@Inject(PLATFORM_ID) private platformId: Object) {}
   isFilePath(fondo: string): boolean {
     return /\.(png|jpg|jpeg|gif|webp)$/i.test(fondo);
@@ -49,7 +49,7 @@ export class ConectionBackService {
   }
   async eliminarTablero(id: string): Promise<any> {
     try {
-      const response = await axios.delete(`${this.baseUrl}/tablero/eliminar?id${id}`);
+      const response = await axios.delete(`${this.baseUrl}/tablero/eliminar?id=${id}`);
       return response.data;
     }
     catch (error) {
