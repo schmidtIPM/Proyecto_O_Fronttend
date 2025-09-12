@@ -232,16 +232,17 @@ export class CreadorTableroComponent {
       this.fondoTablero,
       this.tamanioCelda
     );
+    console.log(tablero);
     this.conectionBack.guardarTablero(tablero)
       .then(respuesta => {
         console.log('Tablero guardado correctamente:', respuesta);
-        this.snackBar.open('Tablero guardado con éxito', 'Cerrar', { 
-          duration: 3000,
-          horizontalPosition: 'center',
-          verticalPosition: 'top',
-        });
         this.router.navigate(['/']).then(() => {
-          window.location.reload();
+          //window.location.reload();
+          this.snackBar.open('Tablero guardado con éxito', 'Cerrar', { 
+            duration: 3000,
+            horizontalPosition: 'center',
+            verticalPosition: 'top',
+          });
         });
       })
       .catch(error => {

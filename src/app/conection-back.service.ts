@@ -4,12 +4,13 @@ import { Tag, Accion, Tablero, Luz, Audio, Movimiento } from './models';
 import { Inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { SrvRecord } from 'node:dns';
+import { cp } from 'node:fs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ConectionBackService {
-  private baseUrl = 'http://1920.168.4.1';
+  private baseUrl = 'http://192.168.4.1';
   constructor(@Inject(PLATFORM_ID) private platformId: Object) {}
   isFilePath(fondo: string): boolean {
     return /\.(png|jpg|jpeg|gif|webp)$/i.test(fondo);
@@ -17,11 +18,14 @@ export class ConectionBackService {
   async guardarTablero(data: Tablero): Promise<any> {
     const formData = new FormData();
     formData.append('data', JSON.stringify(data));
+
     const appendFondoIfFile = (fondo: string | File | undefined, key: string) => {
-      if (fondo instanceof File) {formData.append(key, fondo);}
+      if (fondo instanceof File) formData.append(key, fondo);
     };
+
     appendFondoIfFile(data.fondo, 'tablero-fondo');
     appendFondoIfFile(data.mainTag.fondo, 'mainTag-fondo');
+
     data.listaTags.forEach((tag, tagIndex) => {
       appendFondoIfFile(tag.fondo, `tag-${tagIndex}-fondo`);
       tag.listaAcciones.forEach((accion, accionIndex) => {
@@ -30,26 +34,31 @@ export class ConectionBackService {
         }
       });
     });
+
     data.mainTag.listaAcciones.forEach((accion, i) => {
       if (accion.tipo === 'audio' && typeof (accion as any).archivo !== 'string') {
         formData.append(`mainTag-${i}`, (accion as any).archivo as File);
       }
     });
+
     try {
-      const response = await axios.post(`${this.baseUrl}/tablero/creartablero`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
+      // ✅ Enviar FormData directamente, sin JSON.stringify
+      const response = await axios.post(`${this.baseUrl}/creartablero`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
       });
+
+      console.log('Datos enviados al backend con éxito', response.data);
       return response.data;
+
     } catch (error) {
       console.error('Error al enviar datos al backend:', error);
       throw error;
     }
   }
+
   async eliminarTablero(id: string): Promise<any> {
     try {
-      const response = await axios.delete(`${this.baseUrl}/tablero/eliminar?id=${id}`);
+      const response = await axios.delete(`${this.baseUrl}/eliminar?id=${id}`);
       return response.data;
     }
     catch (error) {
@@ -69,7 +78,7 @@ export class ConectionBackService {
   }
   async getTableroPorId(id: string): Promise<Tablero | null> {
     try { 
-      const response = await axios.get(`${this.baseUrl}/tablero/id`, { params: { _id: id } });
+      const response = await axios.get(`${this.baseUrl}/id`, { params: { _id: id } });
       const tableros: Tablero[] = [response.data];
       return this.procesarRutas(tableros)[0];
     } catch (error) {
@@ -89,7 +98,7 @@ export class ConectionBackService {
   }
   async updateFav(idTablero: string, ponerFavorito: boolean): Promise<any> {
     try {
-      const response = await axios.post(`${this.baseUrl}/tablero/actualizarFav/${idTablero}/${ponerFavorito}`);
+      const response = await axios.post(`${this.baseUrl}/actualizarFav/${idTablero}/${ponerFavorito}`);
       return response.data;
     } catch (error) {
       console.error('Error al actualizar el tablero', error);
@@ -97,6 +106,7 @@ export class ConectionBackService {
     }
   }
   async getImagenesPagina(): Promise<string[]> {
+    return [];
     if (isPlatformBrowser(this.platformId)) {
       try {
         const response = await axios.get(`${this.baseUrl}/static/imgPag`);
