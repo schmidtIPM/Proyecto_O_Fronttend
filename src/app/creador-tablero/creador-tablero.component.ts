@@ -215,7 +215,9 @@ export class CreadorTableroComponent {
       for (let columnaIndex = 0; columnaIndex < this.tableroGrid[filaIndex].length; columnaIndex++) {
         const celda = this.tableroGrid[filaIndex][columnaIndex];
         const tagFondo = this.tagGrid.find(t => t.fila === filaIndex && t.columna === columnaIndex);
-        tags.push(new Tag(Math.floor(Math.random() * (564 - 0 + 1)) +5465, celda.acciones, filaIndex, columnaIndex, tagFondo?.fondo));
+        let fondoTag = tagFondo?.fondo;
+        if(fondoTag == null){fondoTag = "FFFFFF";}
+        tags.push(new Tag(Math.floor(Math.random() * (564 - 0 + 1)) +5465, celda.acciones, filaIndex, columnaIndex, fondoTag));
       }
     }
     let mainTag: Tag = new Tag(Math.floor(Math.random() * (564 - 0 + 1)) +5465, 
