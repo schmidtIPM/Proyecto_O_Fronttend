@@ -17,38 +17,49 @@ export class ConectionBackService {
   }
   async guardarTablero(data: Tablero): Promise<any> {
     const formData = new FormData();
+    const renameFile = (file: File, newName: string): File => {
+      const ext = file.name.split('.').pop();
+      return new File([file], `${newName}.${ext}`, { type: file.type });
+    };
     formData.append('data', JSON.stringify(data));
     const appendFondoIfFile = (fondo: string | File | undefined, key: string) => {
-      if (fondo instanceof File) formData.append(key, fondo);
+      if (fondo instanceof File) {
+        const renamed = renameFile(fondo, key);
+        formData.append(key, renamed);
+      }
     };
     appendFondoIfFile(data.fondo, 'tablero-fondo');
     appendFondoIfFile(data.mainTag.fondo, 'mainTag-fondo');
+
     data.listaTags.forEach((tag, tagIndex) => {
       appendFondoIfFile(tag.fondo, `tag-${tagIndex}-fondo`);
       tag.listaAcciones.forEach((accion, accionIndex) => {
         if (accion.tipo === 'audio' && typeof (accion as any).archivo !== 'string') {
-          formData.append(`tag-${tagIndex}-accion-${accionIndex}`, (accion as any).archivo as File);
+          const file = (accion as any).archivo as File;
+          const renamed = renameFile(file, `tag-${tagIndex}-accion-${accionIndex}`);
+          formData.append(`tag-${tagIndex}-accion-${accionIndex}`, renamed);
         }
       });
     });
+
     data.mainTag.listaAcciones.forEach((accion, i) => {
       if (accion.tipo === 'audio' && typeof (accion as any).archivo !== 'string') {
-        formData.append(`mainTag-${i}`, (accion as any).archivo as File);
+        const file = (accion as any).archivo as File;
+        const renamed = renameFile(file, `mainTag-${i}`);
+        formData.append(`mainTag-${i}`, renamed);
       }
     });
+
     try {
       const response = await axios.post(`${this.baseUrl}/creartablero`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
-
-      console.log('Datos enviados al backend con éxito', response.data);
       return response.data;
-
     } catch (error) {
-      console.error('Error al enviar datos al backend:', error);
       throw error;
     }
   }
+
 
   async eliminarTablero(id: string): Promise<any> {
     try {
