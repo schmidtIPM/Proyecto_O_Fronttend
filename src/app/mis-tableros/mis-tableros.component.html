@@ -21,14 +21,14 @@
       <div class="card-body">
         <div class="card-header">
           <h3>{{ tablero.nombre }}</h3>
-          <button class="btn-fav" (click)="actualizarFavorito(tablero)">
+          <button class="btn-fav" (click)="actualizarFavorito(tablero)"> a
             <img *ngIf="!tablero.favoritos" [src]="estrella">
             <img *ngIf="tablero.favoritos" [src]="estrellaAmarilla">
           </button>
         </div>
-        <button class="btn" (click)="eliminarTablero(tablero._id)">Eliminar</button>
-        <button class="btn" (click)="irAEditarTablero(tablero._id)">Editar</button>
-        <button class="btn" (click)="irASimularTablero(tablero._id)">Simular</button>
+        <button class="btn" (click)="eliminarTablero(tablero.id)">Eliminar</button>
+        <button class="btn" (click)="irAEditarTablero(tablero.id)">Editar</button>
+        <button class="btn" (click)="irASimularTablero(tablero.id)">Simular</button>
       </div>
     </div>
   </ng-template>
@@ -58,9 +58,9 @@
               <img *ngIf="tablero.favoritos" [src]="estrellaAmarilla">
             </button>
           </div>
-          <button class="btn" (click)="eliminarTablero(tablero._id)">Eliminar</button>
-          <button class="btn" (click)="irAEditarTablero(tablero._id)">Editar</button>
-          <button class="btn" (click)="irASimularTablero(tablero._id)">Simular</button>
+          <button class="btn" (click)="eliminarTablero(tablero.id)">Eliminar</button>
+          <button class="btn" (click)="irAEditarTablero(tablero.id)">Editar</button>
+          <button class="btn" (click)="irASimularTablero(tablero.id)">Simular</button>
         </div>
       </div>
     </ng-template>
@@ -92,9 +92,9 @@
               <img *ngIf="tablero.favoritos" [src]="estrellaAmarilla">
             </button>
           </div>
-          <button class="btn" (click)="eliminarTablero(tablero._id)">Eliminar</button>
-          <button class="btn" (click)="irAEditarTablero(tablero._id)">Editar</button>
-          <button class="btn" (click)="irASimularTablero(tablero._id)">Simular</button>
+          <button class="btn" (click)="eliminarTablero(tablero.id)">Eliminar</button>
+          <button class="btn" (click)="irAEditarTablero(tablero.id)">Editar</button>
+          <button class="btn" (click)="irASimularTablero(tablero.id)">Simular</button>
         </div>
       </div>
     </ng-template>

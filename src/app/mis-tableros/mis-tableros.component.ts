@@ -40,7 +40,6 @@ export class MisTablerosComponent {
     }
   }
 
-
   getFondoTablero(tablero: Tablero) {
     const fondo = tablero.fondo;
 
@@ -94,11 +93,11 @@ export class MisTablerosComponent {
     return /%[0-9A-Fa-f]{2}/.test(url) ? url : encodeURI(url);
   }
   actualizarFavorito(tablero: Tablero) {
-    if (!tablero._id) {
+    if (!tablero.id) {
       console.error('El tablero no tiene un _id definido.');
       return;
     }
-    this.conectionBack.updateFav(tablero._id, !tablero.favoritos)
+    this.conectionBack.updateFav(tablero.id.toString(), !tablero.favoritos)
       .then(response => {
         tablero.favoritos = !tablero.favoritos;
         console.log('Tablero actualizado:', response);

@@ -63,7 +63,10 @@ export class ConectionBackService {
 
   async eliminarTablero(id: string): Promise<any> {
     try {
-      const response = await axios.delete(`${this.baseUrl}/eliminar?id=${id}`);
+      const formData = new FormData();
+      formData.append('data', JSON.stringify({ id }));
+      console.log({ "id":  id });
+      const response = await axios.post(`${this.baseUrl}/eliminar`, { "id":  id });     
       return response.data;
     }
     catch (error) {
@@ -83,7 +86,7 @@ export class ConectionBackService {
   }
   async getTableroPorId(id: string): Promise<Tablero | null> {
     try { 
-      const response = await axios.get(`${this.baseUrl}/id`, { params: { _id: id } });
+      const response = await axios.get(`${this.baseUrl}/id`, { params: { id: id } });
       const tableros: Tablero[] = [response.data];
       return this.procesarRutas(tableros)[0];
     } catch (error) {
@@ -103,7 +106,7 @@ export class ConectionBackService {
   }
   async updateFav(idTablero: string, ponerFavorito: boolean): Promise<any> {
     try {
-      const response = await axios.post(`${this.baseUrl}/actualizarFav/${idTablero}/${ponerFavorito}`);
+      const response = await axios.post(`${this.baseUrl}/actualizarFav`, { params: { id: idTablero, favorito: ponerFavorito } } );
       return response.data;
     } catch (error) {
       console.error('Error al actualizar el tablero', error);
