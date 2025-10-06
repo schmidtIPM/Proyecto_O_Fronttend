@@ -106,7 +106,7 @@ export class ConectionBackService {
   }
   async updateFav(idTablero: string, ponerFavorito: boolean): Promise<any> {
     try {
-      const response = await axios.post(`${this.baseUrl}/actualizarFav`, { params: { id: idTablero, favorito: ponerFavorito } } );
+      const response = await axios.post(`${this.baseUrl}/actualizarFav?id=${idTablero}&favorito=${ponerFavorito}`);
       return response.data;
     } catch (error) {
       console.error('Error al actualizar el tablero', error);
