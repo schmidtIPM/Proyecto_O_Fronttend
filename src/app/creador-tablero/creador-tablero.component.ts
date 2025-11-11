@@ -221,7 +221,7 @@ export class CreadorTableroComponent {
       }
     }
     let mainTag: Tag = new Tag(Math.floor(Math.random() * (564 - 0 + 1)) +5465, 
-        this.mainTagAccions, -1, -1, "FFFFFF");
+        this.mainTagAccions, -1, 0, "FFFFFF");
     const tablero = new Tablero(
       Date.now(),
       this.nombreTablero,
