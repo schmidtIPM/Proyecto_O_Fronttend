@@ -9,13 +9,15 @@ import { MiniPaintComponent } from '../mini-paint/mini-paint.component';
 import { LargeNumberLike } from 'node:crypto';
 import { group } from 'node:console';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { RobotMainTagDialogComponent } from '../robot-main-tag-dialog/robot-main-tag-dialog.component';
+
 
 @Component({
   selector: 'app-actualizar-tablero',
   templateUrl: './actualizar-tablero.component.html',
   styleUrls: ['./actualizar-tablero.component.css'],
   standalone: true,
-  imports: [FormsModule, CommonModule]
+  imports: [FormsModule, CommonModule, RobotMainTagDialogComponent, MiniPaintComponent]
 })
 export class ActualizarTableroComponent implements OnInit {
   tablero!: Tablero;
@@ -336,54 +338,6 @@ export class ActualizarTableroComponent implements OnInit {
     }
     return 'Acción desconocida';
   }
-  guardarTablero() {
-    const tags: Tag[] = [];
-    for (let filaIndex = 0; filaIndex < this.tableroGrid.length; filaIndex++) {
-      for (let columnaIndex = 0; columnaIndex < this.tableroGrid[filaIndex].length; columnaIndex++) {
-        const celda = this.tableroGrid[filaIndex][columnaIndex];
-        const tagFondo = this.tagGrid.find(t => t.fila === filaIndex && t.columna === columnaIndex);
-        tags.push(new Tag(Math.floor(Math.random() * (564 - 0 + 1)) +5465, celda.acciones, filaIndex, columnaIndex, tagFondo?.fondo));
-      }
-    }
-    let mainTag: Tag = new Tag(Math.floor(Math.random() * (564 - 0 + 1)) +5465, 
-        this.mainTagAccions, -1, -1, "FFFFFF");
-    const fondoFinal = this.tablero.fondo instanceof File
-      ? URL.createObjectURL(this.tablero.fondo)
-      : this.tablero.fondo;
-    const tablero = new Tablero(
-      Date.now(),
-      this.tablero.nombre,
-      this.tablero.filas,
-      this.tablero.columnas,
-      mainTag,
-      tags,
-      this.tablero._id,
-      this.tablero.colorlineas,
-      this.tablero.fondo,
-      this.tablero.tamanioCelda
-    );
-    if(!this.tablero._id){return;}
-    this.conectionBack.modificarTablero(tablero, this.tablero._id)
-      .then(respuesta => {
-        console.log('Tablero guardado correctamente:', respuesta);
-        this.snackBar.open('Tablero guardado con éxito', 'Cerrar', {
-          duration: 3000,
-          horizontalPosition: 'center',
-          verticalPosition: 'top',
-        });
-        this.router.navigate(['/']).then(() => {
-          window.location.reload();
-        });
-      })
-      .catch(error => {
-        console.error('Error al guardar el tablero:', error);
-        this.snackBar.open('Hubo un error al guardar el tablero.', 'Cerrar', {
-          duration: 3000,
-          horizontalPosition: 'center',
-          verticalPosition: 'top',
-        });
-      });
-  }
   cerrarPanel() {
     this.selectedCell = null;
   }
@@ -396,4 +350,91 @@ export class ActualizarTableroComponent implements OnInit {
       this.onArchivoImagenChange(result)
     });
   }
+  guardarTablero() {
+    console.log('👉 guardarTablero() llamado', this.tablero);
+
+    // 1) Armar tags a partir de lo que tenés en tableroGrid
+    const tags: Tag[] = [];
+    for (let filaIndex = 0; filaIndex < this.tableroGrid.length; filaIndex++) {
+      for (let columnaIndex = 0; columnaIndex < this.tableroGrid[filaIndex].length; columnaIndex++) {
+        const celda = this.tableroGrid[filaIndex][columnaIndex];
+
+        // si no usás tagGrid, no lo busques (evita cosas raras)
+        tags.push(
+          new Tag(
+            Math.floor(Math.random() * (564 - 0 + 1)) + 5465,
+            celda.acciones,
+            filaIndex,
+            columnaIndex,
+            undefined                  // o null si tu constructor lo permite
+          )
+        );
+      }
+    }
+
+    // 2) MainTag con las acciones que editaste
+    const mainTag = new Tag(
+      this.tablero.mainTag?.ID ?? Math.floor(Math.random() * 100000),
+      this.mainTagAccions,
+      -1,
+      -1,
+      this.tablero.mainTag?.fondo ?? '#FFFFFF'
+    );
+
+    // 3) Mantener el mismo id del tablero original
+    const tableroActualizado = new Tablero(
+      this.tablero.id,              // NO Date.now(), mantené el id
+      this.tablero.nombre,
+      this.tablero.filas,
+      this.tablero.columnas,
+      mainTag,
+      tags,
+      this.tablero._id,             // id de mongo si lo usás
+      this.tablero.colorlineas,
+      this.tablero.fondo,
+      this.tablero.tamanioCelda
+    );
+
+    // 4) Id para el backend (usa _id o id, el que tengas)
+    const idBack: any = (this.tablero as any)._id ?? (this.tablero as any).id;
+    if (!idBack) {
+      console.error('❌ El tablero no tiene id, no se puede guardar', this.tablero);
+      this.snackBar.open('No se pudo guardar el tablero (falta ID).', 'Cerrar', {
+        duration: 3000,
+        horizontalPosition: 'center',
+        verticalPosition: 'top',
+      });
+      return;
+    }
+
+    // 5) Llamada al backend
+    this.conectionBack.modificarTablero(tableroActualizado, idBack)
+      .then(respuesta => {
+      console.log('✅ Tablero guardado correctamente:', respuesta);
+
+      const dialogRef = this.dialog.open(RobotMainTagDialogComponent, {
+        width: '420px',
+        disableClose: true,
+        data: { modo: 'actualizar' }
+      });
+
+      dialogRef.afterClosed().subscribe(() => {
+        this.snackBar.open('Tablero actualizado con éxito', 'Cerrar', {
+          duration: 3000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+        });
+        this.router.navigate(['/']);
+      });
+    })
+    .catch(error => {
+      console.error('❌ Error al guardar el tablero:', error);
+      this.snackBar.open('Hubo un error al guardar el tablero.', 'Cerrar', {
+        duration: 3000,
+        horizontalPosition: 'center',
+        verticalPosition: 'top',
+      });
+    });
+  }
+
 }

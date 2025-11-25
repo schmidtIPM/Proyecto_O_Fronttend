@@ -1,5 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
+import { ConectionBackService } from '../conection-back.service';
+import { PregFrecuente } from '../interfaces';
 
 @Component({
   selector: 'app-preguntas-frecuentes',
@@ -7,31 +10,29 @@ import { CommonModule } from '@angular/common';
   templateUrl: './preguntas-frecuentes.component.html',
   styleUrl: './preguntas-frecuentes.component.css'
 })
-export class PreguntasFrecuentesComponent {
-   faqs = [
-    {
-      pregunta: '¿Qué es O-bot?',
-      respuesta: 'O-bot es un robot educativo diseñado para introducir a jóvenes en el mundo de la programación de forma accesible y entretenida. A través de una interfaz visual y tableros interactivos, los usuarios pueden aprender conceptos clave de programación y la lógica.',
-      abierto: false
-    },
-    {
-      pregunta: '¿Para qué sirven los tableros?',
-      respuesta: 'Los tableros son el espacio donde se definen las instrucciones que O-bot debe seguir. Cada celda del tablero puede contener una o varias acciones, como desplazarse, reproducir sonidos o activar luces. Gracias a esto, los usuarios pueden crear recorridos y simulaciones que O-bot ejecuta con precisión.',
-      abierto: false
-    },
-    {
-      pregunta: '¿Cómo creo un nuevo tablero?',
-      respuesta: ` <ol>
-        <li>Accedé al creador de tableros: Desde la barra superior hacé clic en el botón <em>"Creador"</em>. <br>(Ver captura adjunta)</li>
-        <li>Configurá tu tablero: Elegí nombre, tamaño y detalles. Luego hacé clic en <em>"Generar"</em>. <br>(Ver captura adjunta)</li>
-        <li>Diseñá y asigná acciones: Personalizá cada celda con las acciones deseadas y diseño a tu gusto. Finalmente, guardá la creación con <em>"Guardar Tablero"</em>. <br>(Ver captura adjunta)</li>
-      </ol>`,
-      abierto: false
+
+export class PreguntasFrecuentesComponent implements OnInit {
+  faqs: PregFrecuente[] = [];
+
+  constructor(private conectionService: ConectionBackService, private router: Router) {}
+  
+  async ngOnInit(): Promise<void> {
+    await this.cargarPreguntasFrecuentes();
+  }
+
+  async cargarPreguntasFrecuentes(): Promise<void> {
+    try {
+      this.faqs = await this.conectionService.getPregFrecuentes();
+    } catch (error) {
+      console.error('Error al cargar preguntas frecuentes:', error);
+      // Fallback a preguntas por defecto si falla la carga
+      this.router.navigate(['/']);
     }
-  ];
+  }
+  
 
   toggle(index: number): void {
-    this.faqs[index].abierto = !this.faqs[index].abierto;
+    (this.faqs[index] as any).abierto = !(this.faqs[index] as any).abierto;
   }
 
 }

@@ -136,9 +136,6 @@ export class SimuladorTableroComponent {
   esperar(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
-  moverRobot(direccion: 'arriba' | 'abajo' | 'izquierda' | 'derecha') {
-    this.movimientosAcomulados.push(direccion);
-  }
   verificarTamanioCeldas() {
     setTimeout(() => {
       const unaCelda = document.querySelector('.celda') as HTMLElement;
@@ -335,5 +332,24 @@ export class SimuladorTableroComponent {
       return `Luz: Color ${accion.color}, Intervalo ${accion.intervalo} ms`;
     }
     return 'Acción desconocida';
+  }
+  moverRobot(direccion: 'arriba' | 'abajo' | 'izquierda' | 'derecha') {
+    this.movimientosAcomulados.push(direccion);
+  }
+
+  limpiarMovimientos() {
+    this.movimientosAcomulados = [];
+  }
+
+  getIconoMovimiento(
+    mov: 'arriba' | 'abajo' | 'izquierda' | 'derecha'
+  ): string {
+    switch (mov) {
+      case 'arriba': return '↑';
+      case 'abajo': return '↓';
+      case 'izquierda': return '↺';
+      case 'derecha': return '↻';
+      default: return '?';
+    }
   }
 }

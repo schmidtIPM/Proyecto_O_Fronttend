@@ -51,7 +51,7 @@
         </table>
       </div>
     </div>
-    <button (click)="guardarTablero()">Guardar Tablero</button>
+    <button class="primary-btn" (click)="guardarTablero()">Guardar Tablero</button>
   </div>
   <div class="panel-lateral">
     <h2>Tablero: {{ nombreTablero }}</h2>
@@ -63,7 +63,7 @@
       <div style="text-align: left; color: black;">
         <div class="agregar">
           <p><strong>Agregar acción a la main tag:</strong></p>
-          <div class="botones">
+          <div class="botones" style="justify-content: center; margin-bottom: 0.5em;">
             <button *ngFor="let tipo of accionesDisponibles; let i = index"
                     (click)="mostrarFormularioAccion(tipo)"
                     [ngStyle]="{ 'background-color': colores[i % colores.length] }">

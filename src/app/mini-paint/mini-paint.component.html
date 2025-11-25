@@ -1,4 +1,3 @@
-<!-- <h2 mat-dialog-title>Mini Paint</h2> -->
 <mat-dialog-content class="elementos-visuales">
   <div class="botones">
     <input type="color" class="selector-color" [(ngModel)]="colorActual" />
@@ -12,18 +11,19 @@
       class="slider-tamanio"
     />
     <div class="botones-dibujo">
-      <button (click)="usarLapiz()">✏️</button>
-      <button (click)="usarBorrador()">🧽</button>
-      <button (click)="rellenarCanvas()">🪣</button>
+      <button (click)="usarLapiz()" aria-label="Modo lápiz">✏️</button>
+      <button (click)="usarBorrador()" aria-label="Modo borrador">🧽</button>
+      <button (click)="rellenarCanvas()" aria-label="Rellenar lienzo">🪣</button>
     </div>
   </div>
-    <canvas #canvas
-      (mousedown)="startDrawing($event)"
-      (mouseup)="endDrawing()"
-      (mouseleave)="endDrawing()"
-      (mousemove)="draw($event)">
-    </canvas>
+  <canvas #canvas
+    (mousedown)="startDrawing($event)"
+    (mouseup)="endDrawing()"
+    (mouseleave)="endDrawing()"
+    (mousemove)="draw($event)">
+  </canvas>
 </mat-dialog-content>
+
 <mat-dialog-actions class="dialog-actions">
   <button mat-raised-button color="primary" (click)="onCloseClick()">Guardar</button>
 </mat-dialog-actions>

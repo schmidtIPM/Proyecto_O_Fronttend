@@ -1,61 +1,36 @@
 <div>
-<h2 class="categoriaTableros">Mis Tableros</h2>
-<p *ngIf="tablerosNomales.length === 0" style="color: #940c0c; text-align: center; margin-top: 40px;">
-  No hay tableros creados
-</p>
-<p-carousel class="p-carousel"
-  [value]="tablerosNomales"
-  [numVisible]="3"
-  [numScroll]="1"
-  [circular]="true"
-  [responsiveOptions]="responsiveOptions"
-  styleClass="custom-carousel"
-  [attr.id]="'carousel-normales'">
-  
-  <ng-template pTemplate="item" let-tablero>
-    <div class="card">
-      <div class="card-preview" [ngStyle]="getFondoTablero(tablero)">
-        <div class="celda" *ngFor="let celda of celdasVacias"
-             [ngStyle]="{ 'border-color': tablero.colorlineas }"></div>
-      </div>
-      <div class="card-body">
-        <div class="card-header">
-          <h3>{{ tablero.nombre }}</h3>
-          <button class="btn-fav" (click)="actualizarFavorito(tablero)"> a
-            <img *ngIf="!tablero.favoritos" [src]="estrella">
-            <img *ngIf="tablero.favoritos" [src]="estrellaAmarilla">
-          </button>
-        </div>
-        <button class="btn" (click)="eliminarTablero(tablero.id)">Eliminar</button>
-        <button class="btn" (click)="irAEditarTablero(tablero.id)">Editar</button>
-        <button class="btn" (click)="irASimularTablero(tablero.id)">Simular</button>
-      </div>
-    </div>
-  </ng-template>
-</p-carousel>
+  <h2 class="categoriaTableros">Mis Tableros</h2>
+  <p *ngIf="tablerosNomales.length === 0"
+     style="color: #940c0c; text-align: center; margin-top: 40px;">
+    No hay tableros creados
+  </p>
 
-<div *ngIf="tablerosFavoritos.length !== 0">
-  <h2 class="categoriaTableros">Tableros Favoritos</h2>
-  <p-carousel class="p-carousel"
-    [value]="tablerosFavoritos"
+  <p-carousel
+    class="p-carousel"
+    [value]="tablerosNomales"
     [numVisible]="3"
     [numScroll]="1"
-    [circular]="true"
+    [circular]="tablerosNomales.length > currentNumVisible"
+    [showNavigators]="tablerosNomales.length > currentNumVisible"
+    [showIndicators]="tablerosNomales.length > currentNumVisible"
     [responsiveOptions]="responsiveOptions"
-    styleClass="custom-carousel"[attr.id]="'carousel-favoritos'">
-    
+    styleClass="custom-carousel"
+    [attr.id]="'carousel-normales'">
     <ng-template pTemplate="item" let-tablero>
       <div class="card">
         <div class="card-preview" [ngStyle]="getFondoTablero(tablero)">
-          <div class="celda" *ngFor="let celda of celdasVacias"
-              [ngStyle]="{ 'border-color': tablero.colorlineas }"></div>
+          <div
+            class="celda"
+            *ngFor="let celda of celdasVacias"
+            [ngStyle]="{ 'border-color': tablero.colorlineas }">
+          </div>
         </div>
         <div class="card-body">
           <div class="card-header">
             <h3>{{ tablero.nombre }}</h3>
             <button class="btn-fav" (click)="actualizarFavorito(tablero)">
-              <img *ngIf="!tablero.favoritos" [src]="estrella">
-              <img *ngIf="tablero.favoritos" [src]="estrellaAmarilla">
+              <img *ngIf="!tablero.favorito" [src]="estrella" alt="Marcar favorito">
+              <img *ngIf="tablero.favorito" [src]="estrellaAmarilla" alt="Quitar favorito">
             </button>
           </div>
           <button class="btn" (click)="eliminarTablero(tablero.id)">Eliminar</button>
@@ -65,38 +40,74 @@
       </div>
     </ng-template>
   </p-carousel>
-</div>
 
-<div *ngIf="tablerosPredeterminados.length !== 0" >
-  <h2 class="categoriaTableros">Predeterminados</h2>
-  <p-carousel class="p-carousel"
-    [value]="tablerosPredeterminados"
-    [numVisible]="3"
-    [numScroll]="1"
-    [circular]="true"
-    [responsiveOptions]="responsiveOptions"
-    styleClass="custom-carousel" 
-    [attr.id]="'carousel-predeterminados'">
-    
-    <ng-template pTemplate="item" let-tablero>
-      <div class="card">
-        <div class="card-preview" [ngStyle]="getFondoTablero(tablero)">
-          <div class="celda" *ngFor="let celda of celdasVacias"
-              [ngStyle]="{ 'border-color': tablero.colorlineas }"></div>
-        </div>
-        <div class="card-body">
-          <div class="card-header">
-            <h3>{{ tablero.nombre }}</h3>
-            <button class="btn-fav" (click)="actualizarFavorito(tablero)">
-              <img *ngIf="!tablero.favoritos" [src]="estrella">
-              <img *ngIf="tablero.favoritos" [src]="estrellaAmarilla">
-            </button>
+  <div *ngIf="tablerosFavoritos.length !== 0">
+    <h2 class="categoriaTableros">Tableros Favoritos</h2>
+    <p-carousel class="p-carousel"
+      [value]="tablerosFavoritos"
+      [numVisible]="3"
+      [numScroll]="1"
+      [circular]="tablerosFavoritos.length > currentNumVisible"
+      [showNavigators]="tablerosFavoritos.length > currentNumVisible"
+      [showIndicators]="tablerosFavoritos.length > currentNumVisible"
+      [responsiveOptions]="responsiveOptions"
+      styleClass="custom-carousel"
+      [attr.id]="'carousel-favorito'">
+      <ng-template pTemplate="item" let-tablero>
+        <div class="card">
+          <div class="card-preview" [ngStyle]="getFondoTablero(tablero)">
+            <div class="celda" *ngFor="let celda of celdasVacias"
+                 [ngStyle]="{ 'border-color': tablero.colorlineas }"></div>
           </div>
-          <button class="btn" (click)="eliminarTablero(tablero.id)">Eliminar</button>
-          <button class="btn" (click)="irAEditarTablero(tablero.id)">Editar</button>
-          <button class="btn" (click)="irASimularTablero(tablero.id)">Simular</button>
+          <div class="card-body">
+            <div class="card-header">
+              <h3>{{ tablero.nombre }}</h3>
+              <button class="btn-fav" (click)="actualizarFavorito(tablero)">
+                <img *ngIf="!tablero.favorito" [src]="estrella" alt="Marcar favorito">
+                <img *ngIf="tablero.favorito" [src]="estrellaAmarilla" alt="Quitar de favorito">
+              </button>
+            </div>
+            <button class="btn" (click)="eliminarTablero(tablero.id)">Eliminar</button>
+            <button class="btn" (click)="irAEditarTablero(tablero.id)">Editar</button>
+            <button class="btn" (click)="irASimularTablero(tablero.id)">Simular</button>
+          </div>
         </div>
-      </div>
-    </ng-template>
-  </p-carousel>
+      </ng-template>
+    </p-carousel>
+  </div>
+
+  <div *ngIf="tablerosPredeterminados.length !== 0">
+    <h2 class="categoriaTableros">Predeterminados</h2>
+    <p-carousel class="p-carousel"
+      [value]="tablerosPredeterminados"
+      [numVisible]="3"
+      [numScroll]="1"
+      [circular]="tablerosPredeterminados.length > currentNumVisible"
+      [showNavigators]="tablerosPredeterminados.length > currentNumVisible"
+      [showIndicators]="tablerosPredeterminados.length > currentNumVisible"
+      [responsiveOptions]="responsiveOptions"
+      styleClass="custom-carousel"
+      [attr.id]="'carousel-predeterminados'">
+      <ng-template pTemplate="item" let-tablero>
+        <div class="card">
+          <div class="card-preview" [ngStyle]="getFondoTablero(tablero)">
+            <div class="celda" *ngFor="let celda of celdasVacias"
+                 [ngStyle]="{ 'border-color': tablero.colorlineas }"></div>
+          </div>
+          <div class="card-body">
+            <div class="card-header">
+              <h3>{{ tablero.nombre }}</h3>
+              <button class="btn-fav" (click)="actualizarFavorito(tablero)">
+                <img *ngIf="!tablero.favorito" [src]="estrella" alt="Marcar favorito">
+                <img *ngIf="tablero.favorito" [src]="estrellaAmarilla" alt="Quitar de favorito">
+              </button>
+            </div>
+            <button class="btn" (click)="eliminarTablero(tablero.id)">Eliminar</button>
+            <button class="btn" (click)="irAEditarTablero(tablero.id)">Editar</button>
+            <button class="btn" (click)="irASimularTablero(tablero.id)">Simular</button>
+          </div>
+        </div>
+      </ng-template>
+    </p-carousel>
+  </div>
 </div>

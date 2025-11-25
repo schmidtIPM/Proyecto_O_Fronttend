@@ -58,7 +58,7 @@ export class Tablero {
     public colorlineas?: string,
     public fondo?: string | File,
     public tamanioCelda?: number,
-    public favoritos: boolean = false,
+    public favorito: boolean = false,
     public predeterminado: boolean = false,
   ) {}
 }

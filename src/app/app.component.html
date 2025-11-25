@@ -1,12 +1,42 @@
 <header class="app-header">
   <div class="logo">
-    <img [src]="logo" alt="Img logo">
+    <img [src]="logo" alt="Logo de O-bot" />
+    <span class="logo-text">O-bot Tableros</span>
   </div>
   <nav class="nav-buttons">
-    <button (click)="irACreador()">Creador</button>
-    <button (click)="irAHome()">Home</button>
-    <button (click)="irAPreguntas()">Preguntas Frecuentes</button>
-
+    <button type="button" class="nav-btn" (click)="irACreador()">🎨 Creador</button>
+    <button type="button" class="nav-btn" (click)="irAHome()">🏠 Home</button>
+    <button type="button" class="nav-btn" (click)="irAPreguntas()">❔ Preguntas</button>
   </nav>
 </header>
+
 <router-outlet></router-outlet>
+
+<!-- FOOTER CON SLIDER DE ESPACIO -->
+<footer class="app-footer" *ngIf="totalGB">
+  <div class="footer-content">
+    <div class="footer-text">
+      <span class="footer-title">Espacio en la SD</span>
+      <span class="footer-subtitle">
+        {{ libreGB | number:'1.0-1' }} GB libres de {{ totalGB | number:'1.0-1' }} GB
+      </span>
+    </div>
+
+    <div class="footer-slider">
+      <input
+        type="range"
+        class="espacio-slider"
+        min="0"
+        max="100"
+        [value]="porcentajeUsado"
+        disabled
+      />
+
+      <div class="slider-labels">
+        <span>0%</span>
+        <span>{{ porcentajeUsado }}% usado</span>
+        <span>100%</span>
+      </div>
+    </div>
+  </div>
+</footer>

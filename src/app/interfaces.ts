@@ -40,6 +40,15 @@ export interface ITablero {
   fondo: string;
   colorlineas: string | File;
   tamanioCelda: number;
-  favoritos: boolean;
+  favorito: boolean;
   predeterminado: boolean;
+}
+export interface PregFrecuente {
+  pregunta: string;
+  respuesta: string;
+  abierto?: boolean;
+}
+
+export interface PregFrecuentesResponse {
+  preguntasFrecuentes: PregFrecuente[];
 }

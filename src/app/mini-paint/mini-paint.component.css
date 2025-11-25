@@ -1,93 +1,73 @@
 canvas {
-  border: 1px solid black;
-  max-width: 70%;
-  max-height: auto;
+  border: 2px solid var(--color-primary);
+  border-radius: var(--radius-md);
+  background-color: #ffffff;
   width: 25rem;
   height: 25rem;
-}
-
-.botones-dibujo {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-.dialog-actions {
-  display: flex;
-  margin-right: 7.5rem;
-  justify-content: flex-end;
-  padding-top: 1rem;
-}
-
-.botones button {
-  display: inline-block;
-  background-color: #1479e4;
-  color: white;
-  padding: 1.5vw 1.5vw;
-  border-radius: 0.3rem;
-  cursor: pointer;
-  text-align: center;
-  border: 0;
-  font-size: medium;
-}
-
-.botones {
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  flex-direction: column;
-  gap: 0.5rem;
-  padding: 1rem;
+  max-width: 70vw;
 }
 
 .elementos-visuales {
   display: flex;
   justify-content: center;
+  gap: 1.5rem;
+}
+
+.botones {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 0.5rem;
+}
+
+.botones-dibujo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.botones button {
+  background-color: var(--color-primary);
+  color: white;
+  padding: 0.4rem 0.8rem;
+  border-radius: 999px;
+  cursor: pointer;
+  border: none;
+  font-size: 1rem;
 }
 
 .selector-color {
   border: none;
   width: 40px;
   height: 40px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
+  border-radius: 8px;
+  border: 2px solid #ccc;
   background-color: #ffffff;
   display: inline-block;
 }
 
-@media (max-width: 700px){
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 1rem;
+}
+
+@media (max-width: 700px) {
   canvas {
-    border: 1px solid black;
     width: 15rem;
     height: 15rem;
   }
-  .botones button {
-  display: inline-block;
-  background-color: #1479e4;
-  color: white;
-  padding: 2vw 2vw;
-  border-radius: 0.3rem;
-  cursor: pointer;
-  text-align: center;
-  border: 0;
-  font-size: medium;
+  .elementos-visuales {
+    flex-direction: column;
+    align-items: center;
   }
   .botones-dibujo {
-    display: flex;
     flex-direction: row;
-    gap: 1rem;
-  }
-  .elementos-visuales{
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
   }
 }
 
-@media (max-width: 500px){
+@media (max-width: 500px) {
   canvas {
-    border: 1px solid black;
     width: 10rem;
     height: 10rem;
   }

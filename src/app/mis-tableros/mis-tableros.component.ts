@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 import { ConectionBackService } from '../conection-back.service';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
@@ -11,7 +11,7 @@ import { ButtonModule } from 'primeng/button';
   standalone: true,
   imports: [CommonModule, RouterModule, CarouselModule, ButtonModule],
   templateUrl: './mis-tableros.component.html',
-  styleUrl: './mis-tableros.component.css'
+  styleUrls: ['./mis-tableros.component.css']
 })
 export class MisTablerosComponent {
   responsiveOptions = [
@@ -29,9 +29,29 @@ export class MisTablerosComponent {
     private conectionBack: ConectionBackService,
     private router: Router,
   ) {}
+
+  currentNumVisible = 3;
+
+  @HostListener('window:resize')
+  onResize() {
+    this.updateCurrentNumVisible();
+  }
+
+  private updateCurrentNumVisible() {
+    const width = window.innerWidth;
+
+    if (width <= 840)       this.currentNumVisible = 1;
+    else if (width <= 1200) this.currentNumVisible = 2;
+    else if (width <= 1560) this.currentNumVisible = 3;
+    else if (width <= 1920) this.currentNumVisible = 4;
+    else if (width <= 2280) this.currentNumVisible = 5;
+    else                    this.currentNumVisible = 6;
+  }
+
   tableros: any[] = [];
   celdasVacias = Array(9); 
   async ngOnInit() {
+    this.updateCurrentNumVisible();
     this.cargarTableros();
     const response = await this.conectionBack.getImagenesPagina();
     if (response && response.length > 0) {
@@ -97,18 +117,18 @@ export class MisTablerosComponent {
       console.error('El tablero no tiene un _id definido.');
       return;
     }
-    this.conectionBack.updateFav(tablero.id.toString(), !tablero.favoritos)
+    this.conectionBack.updateFav(tablero.id.toString(), !tablero.favorito)
       .then(response => {
-        tablero.favoritos = !tablero.favoritos;
+        tablero.favorito = !tablero.favorito;
         console.log('Tablero actualizado:', response);
       })
       .catch(error => {
         console.error('Error al actualizar el tablero:', error);
       });
   }
-  favoritosIndex = 0;
+  favoritoIndex = 0;
   get tablerosFavoritos(): any[] {
-    return this.tableros.filter(t => t.favoritos);
+    return this.tableros.filter(t => t.favorito);
   }
   get tablerosPredeterminados(): any[] {
     return this.tableros.filter(t => t.predeterminado);

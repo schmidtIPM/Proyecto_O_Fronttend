@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import axios from "axios";
 import { Tag, Accion, Tablero, Luz, Audio, Movimiento } from './models';
+import { PregFrecuente, PregFrecuentesResponse } from './interfaces';
 import { Inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { SrvRecord } from 'node:dns';
@@ -106,15 +107,28 @@ export class ConectionBackService {
   }
   async updateFav(idTablero: string, ponerFavorito: boolean): Promise<any> {
     try {
-      const response = await axios.post(`${this.baseUrl}/actualizarFav?id=${idTablero}&favorito=${ponerFavorito}`);
+      const body = new URLSearchParams();
+      body.append('id', idTablero);
+      body.append('favorito', ponerFavorito ? 'true' : 'false');
+
+      const response = await axios.post(
+        `${this.baseUrl}/actualizarFav`,
+        body.toString(),
+        {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+        }
+      );
+
       return response.data;
     } catch (error) {
       console.error('Error al actualizar el tablero', error);
       throw error;
     }
   }
+
   async getImagenesPagina(): Promise<string[]> {
-    return [];
     if (isPlatformBrowser(this.platformId)) {
       try {
         const response = await axios.get(`${this.baseUrl}/static/imgPag`);
@@ -128,6 +142,24 @@ export class ConectionBackService {
       }
     }
     return [];
+  }
+  async getPregFrecuentes(): Promise<PregFrecuente[]> {
+    try {
+      const response = await axios.get<PregFrecuentesResponse>(`${this.baseUrl}/preguntasFrecuentes`);
+      return response.data.preguntasFrecuentes;
+    } catch (error) {
+      console.error('Error al obtener preguntas frecuentes', error);
+      return [];
+    }
+  }
+  async getEspacioSD(): Promise<{ totalGB: number; libreGB: number } | null> {
+    try {
+      const response = await axios.get<{ totalGB: number; libreGB: number }>(`${this.baseUrl}/espacioSD`);
+      return response.data;
+    } catch (error) {
+      console.error('Error al obtener espacio de la SD', error);
+      return null;
+    }
   }
   procesarRutas(tableros: Tablero[]): Tablero[] {
     return tableros.map(tablero => {

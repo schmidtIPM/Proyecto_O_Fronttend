@@ -8,13 +8,14 @@ import { MatDialog } from '@angular/material/dialog';
 import { MiniPaintComponent } from '../mini-paint/mini-paint.component';
 import { ActivatedRoute, Route, Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { RobotMainTagDialogComponent } from '../robot-main-tag-dialog/robot-main-tag-dialog.component';
 
 @Component({
   standalone: true,
   selector: 'app-creador-tablero',
   templateUrl: './creador-tablero.component.html',
   styleUrls: ['./creador-tablero.component.css'],
-  imports: [FormsModule, CommonModule]
+  imports: [FormsModule, CommonModule, RobotMainTagDialogComponent, MiniPaintComponent]
 })
 export class CreadorTableroComponent {
   filas = 3;
@@ -216,12 +217,28 @@ export class CreadorTableroComponent {
         const celda = this.tableroGrid[filaIndex][columnaIndex];
         const tagFondo = this.tagGrid.find(t => t.fila === filaIndex && t.columna === columnaIndex);
         let fondoTag = tagFondo?.fondo;
-        if(fondoTag == null){fondoTag = "FFFFFF";}
-        tags.push(new Tag(Math.floor(Math.random() * (564 - 0 + 1)) +5465, celda.acciones, filaIndex, columnaIndex, fondoTag));
+        if (fondoTag == null) { fondoTag = 'FFFFFF'; }
+
+        tags.push(
+          new Tag(
+            Math.floor(Math.random() * (564 - 0 + 1)) + 5465,
+            celda.acciones,
+            filaIndex,
+            columnaIndex,
+            fondoTag
+          )
+        );
       }
     }
-    let mainTag: Tag = new Tag(Math.floor(Math.random() * (564 - 0 + 1)) +5465, 
-        this.mainTagAccions, -1, 0, "FFFFFF");
+
+    const mainTag = new Tag(
+      Math.floor(Math.random() * (564 - 0 + 1)) + 5465,
+      this.mainTagAccions,
+      -1,
+      0,
+      'FFFFFF'
+    );
+
     const tablero = new Tablero(
       Date.now(),
       this.nombreTablero,
@@ -234,17 +251,24 @@ export class CreadorTableroComponent {
       this.fondoTablero,
       this.tamanioCelda
     );
-    console.log(tablero);
+
     this.conectionBack.guardarTablero(tablero)
       .then(respuesta => {
         console.log('Tablero guardado correctamente:', respuesta);
-        this.router.navigate(['/']).then(() => {
-          //window.location.reload();
-          this.snackBar.open('Tablero guardado con éxito', 'Cerrar', { 
+
+        const dialogRef = this.dialog.open(RobotMainTagDialogComponent, {
+          width: '420px',
+          disableClose: true,
+          data: { modo: 'crear' }
+        });
+
+        dialogRef.afterClosed().subscribe(() => {
+          this.snackBar.open('Tablero creado con éxito', 'Cerrar', {
             duration: 3000,
             horizontalPosition: 'center',
             verticalPosition: 'top',
           });
+          this.router.navigate(['/']);
         });
       })
       .catch(error => {
@@ -256,6 +280,7 @@ export class CreadorTableroComponent {
         });
       });
   }
+
   cerrarPanel() {
     this.selectedCell = null;
   }

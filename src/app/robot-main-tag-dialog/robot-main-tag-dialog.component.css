@@ -1,0 +1,30 @@
+.robot-dialog {
+  padding: 1.5rem 1.75rem 1.25rem;
+  max-width: 420px;
+}
+
+.robot-dialog-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.robot-icon {
+  font-size: 2rem;
+}
+
+.robot-dialog-text {
+  margin: 0 0 0.25rem;
+}
+
+.robot-dialog-subtext {
+  margin: 0 0 1rem;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.robot-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+}
